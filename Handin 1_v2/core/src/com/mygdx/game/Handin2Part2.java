@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point3;
@@ -32,6 +33,7 @@ public class Handin2Part2 extends ApplicationAdapter {
     public ModelInstance boxInstances[];
 	public Model boxModel;
 	Mat cameraMatrix;
+	MatOfDouble distCoeffs;
 	
 	VideoCapture camera;
 	MatOfPoint3f chessboard3dPos;
@@ -39,7 +41,7 @@ public class Handin2Part2 extends ApplicationAdapter {
 	boolean isCalibrated = false;
 	List<Mat> calibObjectPoints;
 	List<Mat> calibImagePoints;
-	private Size calibChessboardSize = new Size(9,6);
+	private Size chessboardSize = new Size(9,6);
 	private int calibCounter = 0;
 	
 	
@@ -54,8 +56,8 @@ public class Handin2Part2 extends ApplicationAdapter {
 		libGdxCam.update();
 		
 		Point3[] positions = new Point3[49];
-		for (int i=0; i<7; i++) {
-			for (int j=0; j<7; j++) {
+		for (int i=0; i<6; i++) {
+			for (int j=0; j<9; j++) {
 				positions[i*7+j] = new Point3(i+1, j+1, 0);
 			}
 		}
@@ -76,8 +78,8 @@ public class Handin2Part2 extends ApplicationAdapter {
             Usage.Position | Usage.Normal);
 		
         boxInstances = new ModelInstance[32];
-        for (int i=0; i<8; i++) {
-        	for (int j=0; j<8; j=j+2) {
+        for (int i=0; i<7; i++) {
+        	for (int j=0; j<10; j=j+2) {
         		int k = j;
         		if (i%2 == 1) {
         			k++;
@@ -87,8 +89,6 @@ public class Handin2Part2 extends ApplicationAdapter {
 	        	boxInstances[i*4+j/2] = instance;
         	}
         }
-        
-        
         
 	}
 	
@@ -101,26 +101,24 @@ public class Handin2Part2 extends ApplicationAdapter {
 		Imgproc.cvtColor(cameraImage, greyImage, Imgproc.COLOR_BGR2GRAY);
 		
 		MatOfPoint2f corners = new MatOfPoint2f();
-		corners.alloc(49);
-		boolean found = Calib3d.findChessboardCorners(greyImage, new Size(7, 7),
+		corners.alloc(54);
+		boolean found = Calib3d.findChessboardCorners(greyImage, chessboardSize,
 				corners, Calib3d.CALIB_CB_ADAPTIVE_THRESH);
 		
 		if (! isCalibrated) {
+			Calib3d.drawChessboardCorners(cameraImage, chessboardSize, corners, true);
 			
-			corners = new MatOfPoint2f();
-			corners.alloc(54);
-			found = Calib3d.findChessboardCorners(greyImage, calibChessboardSize,
-					corners, Calib3d.CALIB_CB_ADAPTIVE_THRESH);
-			
+			calibObjectPoints.add(chessboard3dPos);
+			calibImagePoints.add(corners);
 			
 			calibCounter++;
 			if (calibCounter > 20) {
-				Mat cameraMatrix = new Mat();
-				Mat distCoeffs = new Mat();
+				cameraMatrix = new Mat();
+				distCoeffs = new MatOfDouble();
 				List<Mat> rvecs = new ArrayList<Mat>();
 				List<Mat> tvecs = new ArrayList<Mat>();
 				
-				Calib3d.calibrateCamera(calibObjectPoints, calibImagePoints, calibChessboardSize,
+				Calib3d.calibrateCamera(calibObjectPoints, calibImagePoints, chessboardSize,
 						cameraMatrix, distCoeffs, rvecs, tvecs);
 				isCalibrated = true;
 			}
@@ -129,12 +127,10 @@ public class Handin2Part2 extends ApplicationAdapter {
 		}
 		
 		if (found) {
-			Calib3d.drawChessboardCorners(cameraImage, new Size(7,7), corners, true);
-			
 			Mat rvec = new Mat();
 			Mat tvec = new Mat();
 			Calib3d.solvePnP(chessboard3dPos, corners, cameraMatrix,
-					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
+					distCoeffs, rvec, tvec);
 			
 			UtilAR.setCameraByRT(rvec, tvec, libGdxCam);
 		}
