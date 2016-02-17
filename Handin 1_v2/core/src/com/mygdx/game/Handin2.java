@@ -1,8 +1,5 @@
 package com.mygdx.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -36,18 +33,8 @@ public class Handin2 extends ApplicationAdapter {
 	VideoCapture camera;
 	MatOfPoint3f chessboard3dPos;
 	
-	boolean isCalibrated = false;
-	List<Mat> objectPoints;
-	List<Mat> imagePoints;
-	private Size calibChessboardSize = new Size(9,6);
-	private int calibCounter = 0;
-	
-	
 	@Override
 	public void create() {
-		objectPoints = new ArrayList<Mat>();
-		imagePoints = new ArrayList<Mat>();
-		
 		libGdxCam = new PerspectiveOffCenterCamera();
 		cameraMatrix = UtilAR.getDefaultIntrinsics(640f, 480f);
 		libGdxCam.setByIntrinsics(cameraMatrix, 640f, 480f);
@@ -104,21 +91,6 @@ public class Handin2 extends ApplicationAdapter {
 		corners.alloc(49);
 		boolean found = Calib3d.findChessboardCorners(greyImage, new Size(7, 7),
 				corners, Calib3d.CALIB_CB_ADAPTIVE_THRESH);
-		
-		if (! isCalibrated) {
-			
-			calibCounter++;
-			if (calibCounter > 20) {
-				Mat cameraMatrix = new Mat();
-				Mat distCoeffs = new Mat();
-				List<Mat> rvecs = new ArrayList<Mat>();
-				List<Mat> tvecs = new ArrayList<Mat>();
-				
-				Calib3d.calibrateCamera(objectPoints, imagePoints, calibChessboardSize,
-						cameraMatrix, distCoeffs, rvecs, tvecs);
-				isCalibrated = true;
-			}
-		}
 		
 		if (found) {
 			Calib3d.drawChessboardCorners(cameraImage, new Size(7,7), corners, true);
