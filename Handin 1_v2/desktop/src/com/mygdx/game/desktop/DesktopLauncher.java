@@ -8,12 +8,13 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.mygdx.game.Handin2;
 import com.mygdx.game.Handin2Part2;
+import com.mygdx.game.Handin3;
 import com.mygdx.game.MyGdxGame1;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new Handin2Part2(), config);
+		new LwjglApplication(new Handin3(), config);
 	}
 }
