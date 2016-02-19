@@ -55,7 +55,7 @@ public class Handin2Part2Alt extends ApplicationAdapter {
 		libGdxCam.setByIntrinsics(cameraMatrix, 640f, 480f);
 		libGdxCam.update();
 		
-		Point3[] positions = new Point3[49];
+		Point3[] positions = new Point3[56];
 		for (int i=0; i<6; i++) {
 			for (int j=0; j<9; j++) {
 				positions[i*7+j] = new Point3(i+1, j+1, 0);
@@ -77,7 +77,7 @@ public class Handin2Part2Alt extends ApplicationAdapter {
             new Material(ColorAttribute.createDiffuse(Color.RED)),
             Usage.Position | Usage.Normal);
 		
-        boxInstances = new ModelInstance[32];
+        boxInstances = new ModelInstance[27];
         for (int i=0; i<7; i++) {
         	for (int j=0; j<10; j=j+2) {
         		int k = j;
