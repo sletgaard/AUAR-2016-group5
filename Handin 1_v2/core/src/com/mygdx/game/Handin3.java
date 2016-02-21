@@ -80,6 +80,15 @@ public class Handin3 extends ApplicationAdapter {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Mat hierarchy = new Mat();
 		Imgproc.findContours(binaryImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+		/*  image - Source, an 8-bit single-channel image. Non-zero pixels are treated as 1's. Zero pixels remain 0's, so the image is treated as binary. You can use "compare", "inRange", "threshold", "adaptiveThreshold", "Canny", and others to create a binary image out of a grayscale or color one. The function modifies the image while extracting the contours.
+			contours - Detected contours. Each contour is stored as a vector of points.
+			hierarchy - Optional output vector, containing information about the image topology. It has as many elements as the number of contours. For each i-th contour contours[i], the elements hierarchy[i][0], hiearchy[i][1], hiearchy[i][2], and hiearchy[i][3] are set to 0-based indices in contours of the next and previous contours at the same hierarchical level, the first child contour and the parent contour, respectively. If for the contour i there are no next, previous, parent, or nested contours, the corresponding elements of hierarchy[i] will be negative.
+			mode - Contour retrieval mode.
+			
+		---	Brug IKKE RERT_EXTERNAL for extra points.
+			CV_RETR_EXTERNAL retrieves only the extreme outer contours. It sets hierarchy[i][2]=hierarchy[i][3]=-1 for all the contours.
+			CV_CHAIN_APPROX_SIMPLE compresses horizontal, vertical, and diagonal segments and leaves only their end points. For example, an up-right rectangular contour is encoded with 4 points.
+		 */
 		
 		ArrayList<MatOfPoint> ap;
 		ArrayList<MatOfPoint> results = new ArrayList<MatOfPoint>();
@@ -93,6 +102,9 @@ public class Handin3 extends ApplicationAdapter {
 			}
 			MatOfPoint2f curve = new MatOfPoint2f(contour);
 			MatOfPoint2f approxCurve = new MatOfPoint2f();
+			// Check om vi har en firkant. Vi filtrerede dog for kurver og lignende
+			// oppe i findContours, så er dette skridt nødvendigt?
+			// Er dog nødvendigt for extra points :)
 			Imgproc.approxPolyDP(curve, approxCurve, Imgproc.arcLength(curve, true)*0.02, true);
 			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve) > 2000) {
 				
@@ -104,6 +116,10 @@ public class Handin3 extends ApplicationAdapter {
 			}
 		}
 		
+		// Til at sortere i vores resultater kan vi se på krydsproduktet, men også
+		// hierakiet. Vi kan også bruge approxCurve.total for at se på hvor lang edges er totalt,
+		// men kan vel være det samme som at sortere fra mht. counterArea.
+		
 		Point3[] objPoints = new Point3[4];
 		objPoints[0] = new Point3(-5,-5,0);
 		objPoints[1] = new Point3(5,-5,0);
@@ -112,6 +128,7 @@ public class Handin3 extends ApplicationAdapter {
 		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints); // TODO: move to create()
 		
 		if (!results.isEmpty()) {
+			// --- Kun første resultat, fix for extra.
 			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
 			//System.out.println(imagePoints.toList());
 			
@@ -120,8 +137,15 @@ public class Handin3 extends ApplicationAdapter {
 			Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
 			
+			// For extra skal vi ikke bruge denne.
+			// Brug et neutralt kamera.
+			// Util.setTransformRT for hver enkelt marker.
 			UtilAR.setCameraByRT(rvec, tvec, libGdxCam);
 			
+			// Vi skal ikke tegne en box på marker,
+			// vi skal vise et rectified billede af det der er
+			// inde for markeren, og i extra point skal vi lave
+			// et koordinatsystem med en box der cirkler omkring.
 			UtilAR.imDrawBackground(cameraImage);
 			modelBatch.begin(libGdxCam);
 			modelBatch.render(boxInstance, environment);
