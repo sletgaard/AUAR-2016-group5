@@ -177,6 +177,19 @@ public class Handin3 extends ApplicationAdapter {
 			modelBatch.render(yAxisInstance,environment);
 			modelBatch.render(zAxisInstance,environment);
 	        modelBatch.end();
+	        
+	        
+	        Point[] objPoints2 = new Point[4];
+			objPoints2[0] = new Point(-5,-5);
+			objPoints2[1] = new Point(5,-5);
+			objPoints2[2] = new Point(5,5);
+			objPoints2[3] = new Point(-5,5);
+			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
+			
+	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
+	        Mat rectified = cameraImage.mul(homography);
+	        UtilAR.imShow(rectified);
+	        
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
 		}
