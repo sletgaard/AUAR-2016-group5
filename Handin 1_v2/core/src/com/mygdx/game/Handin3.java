@@ -187,7 +187,9 @@ public class Handin3 extends ApplicationAdapter {
 			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
 			
 	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
-	        Mat rectified = cameraImage.mul(homography);
+	        //Mat rectified = cameraImage.mul(homography);
+	        Mat rectified = new Mat();
+	        Imgproc.warpPerspective(cameraImage, rectified, homography, cameraImage.size());
 	        UtilAR.imShow(rectified);
 	        
 		} else {
