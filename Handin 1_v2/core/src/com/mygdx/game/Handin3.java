@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 
 public class Handin3 extends ApplicationAdapter {
 	
@@ -39,6 +40,12 @@ public class Handin3 extends ApplicationAdapter {
     public ModelBatch modelBatch;
     public ModelInstance boxInstance;
     public Model boxModel;
+    public Model xAxisModel;
+    public Model yAxisModel;
+    public Model zAxisModel;
+    public ModelInstance xAxisInstance;
+    public ModelInstance yAxisInstance;
+    public ModelInstance zAxisInstance;
 	
 	@Override
 	public void create() {
@@ -64,6 +71,23 @@ public class Handin3 extends ApplicationAdapter {
         
         boxInstance = new ModelInstance(boxModel); 
 		//boxInstance.transform.translate(0.5F, 0.5F, 0.5F);
+        
+        xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(10,0,0), 
+				 new Material(ColorAttribute.createDiffuse(Color.RED)), 
+				 Usage.Position | Usage.Normal);
+		 
+		yAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,10,0), 
+				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
+				 Usage.Position | Usage.Normal);
+		 
+		zAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,10), 
+				 new Material(ColorAttribute.createDiffuse(Color.YELLOW)), 
+				 Usage.Position | Usage.Normal);
+        
+
+        xAxisInstance = new ModelInstance(xAxisModel);
+        yAxisInstance = new ModelInstance(yAxisModel);
+        zAxisInstance = new ModelInstance(zAxisModel);
 	}
 	
 	@Override
@@ -148,7 +172,10 @@ public class Handin3 extends ApplicationAdapter {
 			// et koordinatsystem med en box der cirkler omkring.
 			UtilAR.imDrawBackground(cameraImage);
 			modelBatch.begin(libGdxCam);
-			modelBatch.render(boxInstance, environment);
+			//modelBatch.render(boxInstance, environment);
+			modelBatch.render(xAxisInstance,environment);
+			modelBatch.render(yAxisInstance,environment);
+			modelBatch.render(zAxisInstance,environment);
 	        modelBatch.end();
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
