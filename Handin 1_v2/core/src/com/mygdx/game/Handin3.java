@@ -12,6 +12,7 @@ import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
@@ -186,11 +187,11 @@ public class Handin3 extends ApplicationAdapter {
 			objPoints2[3] = new Point(-5,5);
 			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
 			
-	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
+	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2, Calib3d.RANSAC, 10);
 	        //Mat rectified = cameraImage.mul(homography);
 	        Mat rectified = new Mat();
-	        Imgproc.warpPerspective(cameraImage, rectified, homography, cameraImage.size());
-	        UtilAR.imShow(rectified);
+	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(cameraImage.cols(),cameraImage.rows()));
+	        UtilAR.imShow("key",rectified);
 	        
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
