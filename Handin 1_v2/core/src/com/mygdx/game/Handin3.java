@@ -128,8 +128,8 @@ public class Handin3 extends ApplicationAdapter {
 			MatOfPoint2f curve = new MatOfPoint2f(contour);
 			MatOfPoint2f approxCurve = new MatOfPoint2f();
 			// Check om vi har en firkant. Vi filtrerede dog for kurver og lignende
-			// oppe i findContours, så er dette skridt nødvendigt?
-			// Er dog nødvendigt for extra points :)
+			// oppe i findContours, sÃ¥ er dette skridt nÃ¸dvendigt?
+			// Er dog nÃ¸dvendigt for extra points :)
 			Imgproc.approxPolyDP(curve, approxCurve, Imgproc.arcLength(curve, true)*0.02, true);
 			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve) > 2000) {
 				
@@ -141,9 +141,9 @@ public class Handin3 extends ApplicationAdapter {
 			}
 		}
 		
-		// Til at sortere i vores resultater kan vi se på krydsproduktet, men også
-		// hierakiet. Vi kan også bruge approxCurve.total for at se på hvor lang edges er totalt,
-		// men kan vel være det samme som at sortere fra mht. counterArea.
+		// Til at sortere i vores resultater kan vi se pÃ¥ krydsproduktet, men ogsÃ¥
+		// hierakiet. Vi kan ogsÃ¥ bruge approxCurve.total for at se pÃ¥ hvor lang edges er totalt,
+		// men kan vel vÃ¦re det samme som at sortere fra mht. counterArea.
 		
 		Point3[] objPoints = new Point3[4];
 		objPoints[0] = new Point3(-5,-5,0);
@@ -153,7 +153,7 @@ public class Handin3 extends ApplicationAdapter {
 		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints); // TODO: move to create()
 		
 		if (!results.isEmpty()) {
-			// --- Kun første resultat, fix for extra.
+			// --- Kun fÃ¸rste resultat, fix for extra.
 			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
 			//System.out.println(imagePoints.toList());
 			
@@ -167,7 +167,7 @@ public class Handin3 extends ApplicationAdapter {
 			// Util.setTransformRT for hver enkelt marker.
 			UtilAR.setCameraByRT(rvec, tvec, libGdxCam);
 			
-			// Vi skal ikke tegne en box på marker,
+			// Vi skal ikke tegne en box pÃ¥ marker,
 			// vi skal vise et rectified billede af det der er
 			// inde for markeren, og i extra point skal vi lave
 			// et koordinatsystem med en box der cirkler omkring.
@@ -177,20 +177,26 @@ public class Handin3 extends ApplicationAdapter {
 			modelBatch.render(xAxisInstance,environment);
 			modelBatch.render(yAxisInstance,environment);
 			modelBatch.render(zAxisInstance,environment);
-	        modelBatch.end();
+			modelBatch.end();
 	        
-	        
-	        Point[] objPoints2 = new Point[4];
-			objPoints2[0] = new Point(-5,-5);
-			objPoints2[1] = new Point(5,-5);
-			objPoints2[2] = new Point(5,5);
-			objPoints2[3] = new Point(-5,5);
+	        	
+	        	Point[] objPoints2 = new Point[4];
+		//	objPoints2[0] = new Point(-5,-5);
+		//	objPoints2[1] = new Point(5,-5);
+		//	objPoints2[2] = new Point(5,5);
+		//	objPoints2[3] = new Point(-5,5);
+			objPoints2[0] = new Point(0,0);
+			objPoints2[1] = new Point(500,0);
+			objPoints2[2] = new Point(500,500);
+			objPoints2[3] = new Point(0,500);
 			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
 			
-	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2, Calib3d.RANSAC, 10);
+	        //Mat homography = Calib3d.findHomography(imagePoints, objectPoints2, Calib3d.RANSAC, 10);
+	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
 	        //Mat rectified = cameraImage.mul(homography);
 	        Mat rectified = new Mat();
-	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(cameraImage.cols(),cameraImage.rows()));
+	        //Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(cameraImage.cols(),cameraImage.rows()));
+	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
 	        UtilAR.imShow("key",rectified);
 	        
 		} else {
