@@ -92,6 +92,10 @@ public class Handin3part2 extends ApplicationAdapter {
 		angle++;
 		angle = angle % 360;
 		
+		float x = (float) Math.cos(angle);
+		float y = 2.5f;
+	    float z = (float) Math.sin(angle);
+		
 		Mat cameraImage = new Mat();
 		camera.read(cameraImage);
 		
@@ -175,10 +179,6 @@ public class Handin3part2 extends ApplicationAdapter {
 				ModelInstance yAxisInstance = new ModelInstance(yAxisModel);
 				ModelInstance zAxisInstance = new ModelInstance(zAxisModel);
 				ModelInstance iBox = new ModelInstance(boxModel);
-				
-				float x = (float) Math.cos(angle);
-				float y = 2.5f;
-			    float z = (float) Math.sin(angle);
 			        
 			    Vector3 v = new Vector3(x*2.5f,y,z*2.5f);
 			    iBox.transform.setToTranslation(v);
@@ -186,6 +186,7 @@ public class Handin3part2 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
 				UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
 				UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
+				UtilAR.setTransformByRT(rvec, tvec, iBox.transform);
 				
 				instances.add(xAxisInstance);
 				instances.add(yAxisInstance);
