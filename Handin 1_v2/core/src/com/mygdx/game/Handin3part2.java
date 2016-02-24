@@ -168,6 +168,8 @@ public class Handin3part2 extends ApplicationAdapter {
 			//UtilAR.setCameraByRT(rvec, tvec, libGdxCam);
 			UtilAR.setNeutralCamera(libGdxCam);
 			UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
+			UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
+			UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
 			
 			// Vi skal ikke tegne en box på marker,
 			// vi skal vise et rectified billede af det der er
