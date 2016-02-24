@@ -139,6 +139,7 @@ public class Handin3 extends ApplicationAdapter {
 			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve, true) > 2000
 					&& contourHierarchy[2] != -1) {
 				
+				// Checks if child contour is a quadrilateral
 				int childContourId = (int) contourHierarchy[2];
 				MatOfPoint2f childContour = new MatOfPoint2f(contours.get(childContourId).toArray());
 				MatOfPoint2f approxChildContour = new MatOfPoint2f();
@@ -195,21 +196,14 @@ public class Handin3 extends ApplicationAdapter {
 	        
 	        
 	        Point[] objPoints2 = new Point[4];
-		//	objPoints2[0] = new Point(-5,-5);
-		//	objPoints2[1] = new Point(5,-5);
-		//	objPoints2[2] = new Point(5,5);
-		//	objPoints2[3] = new Point(-5,5);
 			objPoints2[0] = new Point(0,0);
 			objPoints2[1] = new Point(500,0);
 			objPoints2[2] = new Point(500,500);
 			objPoints2[3] = new Point(0,500);
 			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
 			
-	        //Mat homography = Calib3d.findHomography(imagePoints, objectPoints2, Calib3d.RANSAC, 10);
 	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
-	        //Mat rectified = cameraImage.mul(homography);
 	        Mat rectified = new Mat();
-	        //Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(cameraImage.cols(),cameraImage.rows()));
 	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
 	        UtilAR.imShow("key",rectified);
 	        
