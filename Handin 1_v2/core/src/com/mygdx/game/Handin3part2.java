@@ -28,6 +28,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 public class Handin3part2 extends ApplicationAdapter {
 	
@@ -44,9 +45,8 @@ public class Handin3part2 extends ApplicationAdapter {
     public Model xAxisModel;
     public Model yAxisModel;
     public Model zAxisModel;
-    public ModelInstance xAxisInstance;
-    public ModelInstance yAxisInstance;
-    public ModelInstance zAxisInstance;
+    public Array<ModelInstance> instances = new Array<ModelInstance>();
+    public int angle;
 	
 	@Override
 	public void create() {
@@ -70,9 +70,6 @@ public class Handin3part2 extends ApplicationAdapter {
             new Material(ColorAttribute.createDiffuse(Color.RED)),
             Usage.Position | Usage.Normal);
         
-        boxInstance = new ModelInstance(boxModel); 
-		//boxInstance.transform.translate(0.5F, 0.5F, 0.5F);
-        
         xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(10,0,0), 
 				 new Material(ColorAttribute.createDiffuse(Color.RED)), 
 				 Usage.Position | Usage.Normal);
@@ -85,14 +82,16 @@ public class Handin3part2 extends ApplicationAdapter {
 				 new Material(ColorAttribute.createDiffuse(Color.YELLOW)), 
 				 Usage.Position | Usage.Normal);
         
-
-        xAxisInstance = new ModelInstance(xAxisModel);
-        yAxisInstance = new ModelInstance(yAxisModel);
-        zAxisInstance = new ModelInstance(zAxisModel);
 	}
 	
 	@Override
 	public void render() {
+		
+		//angle = angle + 0.01f;
+        //if(angle > 359) angle = 0f;
+		angle++;
+		angle = angle % 360;
+		
 		Mat cameraImage = new Mat();
 		camera.read(cameraImage);
 		
@@ -152,56 +151,57 @@ public class Handin3part2 extends ApplicationAdapter {
 		objPoints[3] = new Point3(-5,5,0);
 		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints); // TODO: move to create()
 		
+		Point[] objPoints2 = new Point[4];
+		objPoints2[0] = new Point(0,0);
+		objPoints2[1] = new Point(500,0);
+		objPoints2[2] = new Point(500,500);
+		objPoints2[3] = new Point(0,500);
+		MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2);
+		
 		if (!results.isEmpty()) {
-			// --- Kun første resultat, fix for extra.
-			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
-			//System.out.println(imagePoints.toList());
-			
-			Mat rvec = new Mat();
-			Mat tvec = new Mat();
-			Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
-					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
-			
-			// For extra skal vi ikke bruge denne.
-			// Brug et neutralt kamera.
-			// Util.setTransformRT for hver enkelt marker.
-			//UtilAR.setCameraByRT(rvec, tvec, libGdxCam);
+
 			UtilAR.setNeutralCamera(libGdxCam);
-			UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
-			UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
-			UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
+			instances = new Array<ModelInstance>();
 			
-			// Vi skal ikke tegne en box på marker,
-			// vi skal vise et rectified billede af det der er
-			// inde for markeren, og i extra point skal vi lave
-			// et koordinatsystem med en box der cirkler omkring.
+			for(int i = 0; i < results.size(); i++) {
+				MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
+			
+				Mat rvec = new Mat();
+				Mat tvec = new Mat();
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
+			
+				ModelInstance xAxisInstance = new ModelInstance(xAxisModel);
+				ModelInstance yAxisInstance = new ModelInstance(yAxisModel);
+				ModelInstance zAxisInstance = new ModelInstance(zAxisModel);
+				ModelInstance iBox = new ModelInstance(boxModel);
+				
+				float x = (float) Math.cos(angle);
+				float y = 2.5f;
+			    float z = (float) Math.sin(angle);
+			        
+			    Vector3 v = new Vector3(x*2.5f,y,z*2.5f);
+			    iBox.transform.setToTranslation(v);
+				
+				UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
+				UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
+				UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
+				
+				instances.add(xAxisInstance);
+				instances.add(yAxisInstance);
+				instances.add(zAxisInstance);
+				instances.add(iBox);
+				
+				Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
+		        Mat rectified = new Mat();
+		        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
+		        UtilAR.imShow("key"+i,rectified);
+			}
+			
 			UtilAR.imDrawBackground(cameraImage);
 			modelBatch.begin(libGdxCam);
-			//modelBatch.render(boxInstance, environment);
-			modelBatch.render(xAxisInstance,environment);
-			modelBatch.render(yAxisInstance,environment);
-			modelBatch.render(zAxisInstance,environment);
+			modelBatch.render(instances, environment);
 			modelBatch.end();
-	        
-	        	
-	        	Point[] objPoints2 = new Point[4];
-		//	objPoints2[0] = new Point(-5,-5);
-		//	objPoints2[1] = new Point(5,-5);
-		//	objPoints2[2] = new Point(5,5);
-		//	objPoints2[3] = new Point(-5,5);
-			objPoints2[0] = new Point(0,0);
-			objPoints2[1] = new Point(500,0);
-			objPoints2[2] = new Point(500,500);
-			objPoints2[3] = new Point(0,500);
-			MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2); // TODO: move to create()
-			
-	        //Mat homography = Calib3d.findHomography(imagePoints, objectPoints2, Calib3d.RANSAC, 10);
-	        Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
-	        //Mat rectified = cameraImage.mul(homography);
-	        Mat rectified = new Mat();
-	        //Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(cameraImage.cols(),cameraImage.rows()));
-	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
-	        UtilAR.imShow("key",rectified);
 	        
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
