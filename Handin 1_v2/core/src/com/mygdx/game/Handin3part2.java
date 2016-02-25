@@ -46,7 +46,7 @@ public class Handin3part2 extends ApplicationAdapter {
     public Model yAxisModel;
     public Model zAxisModel;
     public Array<ModelInstance> instances = new Array<ModelInstance>();
-    public int angle;
+    public float angle;
 	
 	@Override
 	public void create() {
@@ -78,7 +78,7 @@ public class Handin3part2 extends ApplicationAdapter {
 				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
 				 Usage.Position | Usage.Normal);
 		 
-		zAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,10), 
+		zAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10), 
 				 new Material(ColorAttribute.createDiffuse(Color.YELLOW)), 
 				 Usage.Position | Usage.Normal);
         
@@ -87,10 +87,10 @@ public class Handin3part2 extends ApplicationAdapter {
 	@Override
 	public void render() {
 		
-		//angle = angle + 0.01f;
-        //if(angle > 359) angle = 0f;
-		angle++;
-		angle = angle % 360;
+		angle = angle + 0.1f;
+        if(angle > 359) angle = 0f;
+		//angle++;
+		//angle = angle % 360;
 		
 		float x = (float) Math.cos(angle);
 		float y = 2.5f;
@@ -119,45 +119,30 @@ public class Handin3part2 extends ApplicationAdapter {
 		 */
 		
 		ArrayList<MatOfPoint> ap;
+		ap = new ArrayList<MatOfPoint>();
 		ArrayList<MatOfPoint> results = new ArrayList<MatOfPoint>();
-		ArrayList<MatOfPoint> squares = new ArrayList<MatOfPoint>();
 		outerloop:
 		for (int i=0; i<contours.size(); i++) {
-			//Imgproc.drawContours(cameraImage, contours, i, new Scalar(0,0,255));
 			Point[] contour = contours.get(i).toArray();
-			for (Point p : contour) {
+			/*for (Point p : contour) {
 				if (p.x <= 1 || p.y <=1 || p.x >= cameraResolutionX-2 || p.y >= cameraResolutionY-2) {
 					continue outerloop;
 				}
-			}
+			}*/
 			MatOfPoint2f curve = new MatOfPoint2f(contour);
 			MatOfPoint2f approxCurve = new MatOfPoint2f();
 			// Check om vi har en firkant. Vi filtrerede dog for kurver og lignende
 			// oppe i findContours, så er dette skridt nødvendigt?
 			// Er dog nødvendigt for extra points :)
 			Imgproc.approxPolyDP(curve, approxCurve, Imgproc.arcLength(curve, true)*0.02, true);
-			
-			double[] contourHierarchy = hierarchy.get(0, i);
-			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve, true) > 2000
-					&& contourHierarchy[2] != -1) {
-				
-				// Checks if child contour is a quadrilateral
-				int childContourId = (int) contourHierarchy[2];
-				MatOfPoint2f childContour = new MatOfPoint2f(contours.get(childContourId).toArray());
-				MatOfPoint2f approxChildContour = new MatOfPoint2f();
-				Imgproc.approxPolyDP(childContour, approxChildContour, Imgproc.arcLength(curve, true)*0.02, true);
-				if (approxChildContour.toList().size() != 4) {
-					break;
-				}
-				 
-				ap = new ArrayList<MatOfPoint>();
-				ap.add(new MatOfPoint(approxCurve.toArray()));
-				//Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
+			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve,true) > 2000) {
+							
+				ap.add(new MatOfPoint(approxCurve.toArray()));	
 				results.add(new MatOfPoint(approxCurve.toArray()));
-				
 			}
 		}
 		
+		Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 		// Til at sortere i vores resultater kan vi se på krydsproduktet, men også
 		// hierakiet. Vi kan også bruge approxCurve.total for at se på hvor lang edges er totalt,
 		// men kan vel være det samme som at sortere fra mht. counterArea.
@@ -181,8 +166,9 @@ public class Handin3part2 extends ApplicationAdapter {
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
 			
+			System.out.println(results.size());
 			for(int i = 0; i < results.size(); i++) {
-				MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
+				MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(i).toArray());
 			
 				Mat rvec = new Mat();
 				Mat tvec = new Mat();
@@ -194,13 +180,15 @@ public class Handin3part2 extends ApplicationAdapter {
 				ModelInstance zAxisInstance = new ModelInstance(zAxisModel);
 				ModelInstance iBox = new ModelInstance(boxModel);
 			        
-			    Vector3 v = new Vector3(x*2.5f,y,z*2.5f);
-			    iBox.transform.setToTranslation(v);
+			    Vector3 v = new Vector3(x*2.5f,0,-z*2.5f);
+			    //iBox.transform.setToTranslation(v);
+			    
 				
 				UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
 				UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
 				UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
 				UtilAR.setTransformByRT(rvec, tvec, iBox.transform);
+				iBox.transform.translate(v);
 				
 				instances.add(xAxisInstance);
 				instances.add(yAxisInstance);
