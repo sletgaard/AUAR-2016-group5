@@ -120,8 +120,10 @@ public class Handin3part2 extends ApplicationAdapter {
 		
 		ArrayList<MatOfPoint> ap;
 		ArrayList<MatOfPoint> results = new ArrayList<MatOfPoint>();
+		ArrayList<MatOfPoint> squares = new ArrayList<MatOfPoint>();
 		outerloop:
 		for (int i=0; i<contours.size(); i++) {
+			//Imgproc.drawContours(cameraImage, contours, i, new Scalar(0,0,255));
 			Point[] contour = contours.get(i).toArray();
 			for (Point p : contour) {
 				if (p.x <= 1 || p.y <=1 || p.x >= cameraResolutionX-2 || p.y >= cameraResolutionY-2) {
@@ -134,13 +136,25 @@ public class Handin3part2 extends ApplicationAdapter {
 			// oppe i findContours, så er dette skridt nødvendigt?
 			// Er dog nødvendigt for extra points :)
 			Imgproc.approxPolyDP(curve, approxCurve, Imgproc.arcLength(curve, true)*0.02, true);
-			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve) > 2000) {
+			
+			double[] contourHierarchy = hierarchy.get(0, i);
+			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve, true) > 2000
+					&& contourHierarchy[2] != -1) {
 				
+				// Checks if child contour is a quadrilateral
+				int childContourId = (int) contourHierarchy[2];
+				MatOfPoint2f childContour = new MatOfPoint2f(contours.get(childContourId).toArray());
+				MatOfPoint2f approxChildContour = new MatOfPoint2f();
+				Imgproc.approxPolyDP(childContour, approxChildContour, Imgproc.arcLength(curve, true)*0.02, true);
+				if (approxChildContour.toList().size() != 4) {
+					break;
+				}
 				 
 				ap = new ArrayList<MatOfPoint>();
 				ap.add(new MatOfPoint(approxCurve.toArray()));
-				Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
+				//Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 				results.add(new MatOfPoint(approxCurve.toArray()));
+				
 			}
 		}
 		
