@@ -200,12 +200,12 @@ public class Handin3part3 extends ApplicationAdapter {
 				// Ekstra: Find selv homografien!
 				//Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
 				// PH = 0, hvor P er en 8x9 matrix med 8 ubekendte = vi kan løse den!
-				Mat h = new Mat();
+				Mat h = new Mat(9,1,CvType.CV_64F);
 				Mat p = new Mat(8,9,CvType.CV_64F);
 				Mat zeros = new Mat(8,1,CvType.CV_64F);
 				
 				// Fyld zeroes ud
-				for(int j = 0; j < 9; j++) {
+				for(int j = 0; j < 8; j++) {
 					zeros.put(j, 0, 0);
 				}
 				
@@ -233,73 +233,96 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(1, 8, points[0].y); // y1'
 				
 				// Andet point = (500,0)
-				p.put(0, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
-				p.put(0, 1, 0); // 
-				p.put(0, 2, -1);
-				p.put(0, 3, 0);
-				p.put(0, 4, 0);
-				p.put(0, 5, 0);
-				p.put(0, 6, 500*points[1].x);
-				p.put(0, 7, 0);
-				p.put(0, 8, points[1].x); // x1'
+				p.put(2, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
+				p.put(2, 1, 0); // 
+				p.put(2, 2, -1);
+				p.put(2, 3, 0);
+				p.put(2, 4, 0);
+				p.put(2, 5, 0);
+				p.put(2, 6, 500*points[1].x);
+				p.put(2, 7, 0);
+				p.put(2, 8, points[1].x); // x1'
 				
-				p.put(1, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
-				p.put(1, 1, 0); // 
-				p.put(1, 2, 0);
-				p.put(1, 3, -500);
-				p.put(1, 4, 0);
-				p.put(1, 5, -1);
-				p.put(1, 6, 500*points[1].y);
-				p.put(1, 7, 0);
-				p.put(1, 8, points[1].y); // y1'
+				p.put(3, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
+				p.put(3, 1, 0); // 
+				p.put(3, 2, 0);
+				p.put(3, 3, -500);
+				p.put(3, 4, 0);
+				p.put(3, 5, -1);
+				p.put(3, 6, 500*points[1].y);
+				p.put(3, 7, 0);
+				p.put(3, 8, points[1].y); // y1'
 				
 				// Tredje point = (500,500)
-				p.put(0, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
-				p.put(0, 1, -500); // 
-				p.put(0, 2, -1);
-				p.put(0, 3, 0);
-				p.put(0, 4, 0);
-				p.put(0, 5, 0);
-				p.put(0, 6, 500*points[2].x);
-				p.put(0, 7, 500*points[2].x);
-				p.put(0, 8, points[2].x); // x1'
+				p.put(4, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
+				p.put(4, 1, -500); // 
+				p.put(4, 2, -1);
+				p.put(4, 3, 0);
+				p.put(4, 4, 0);
+				p.put(4, 5, 0);
+				p.put(4, 6, 500*points[2].x);
+				p.put(4, 7, 500*points[2].x);
+				p.put(4, 8, points[2].x); // x1'
 				
-				p.put(1, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
-				p.put(1, 1, 0); // 
-				p.put(1, 2, 0);
-				p.put(1, 3, -500);
-				p.put(1, 4, -500);
-				p.put(1, 5, -1);
-				p.put(1, 6, 500*points[2].y);
-				p.put(1, 7, 500*points[2].y);
-				p.put(1, 8, points[2].y); // y1'
+				p.put(5, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
+				p.put(5, 1, 0); // 
+				p.put(5, 2, 0);
+				p.put(5, 3, -500);
+				p.put(5, 4, -500);
+				p.put(5, 5, -1);
+				p.put(5, 6, 500*points[2].y);
+				p.put(5, 7, 500*points[2].y);
+				p.put(5, 8, points[2].y); // y1'
 				
 				// Fjerde point = (0,500)
-				p.put(0, 0, 0); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
-				p.put(0, 1, -500); // 
-				p.put(0, 2, -1);
-				p.put(0, 3, 0);
-				p.put(0, 4, 0);
-				p.put(0, 5, 0);
-				p.put(0, 6, 0);
-				p.put(0, 7, 500*points[3].x);
-				p.put(0, 8, points[3].x); // x1'
+				p.put(6, 0, 0); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
+				p.put(6, 1, -500); // 
+				p.put(6, 2, -1);
+				p.put(6, 3, 0);
+				p.put(6, 4, 0);
+				p.put(6, 5, 0);
+				p.put(6, 6, 0);
+				p.put(6, 7, 500*points[3].x);
+				p.put(6, 8, points[3].x); // x1'
 				
-				p.put(1, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
-				p.put(1, 1, 0); // 
-				p.put(1, 2, 0);
-				p.put(1, 3, 0);
-				p.put(1, 4, -500);
-				p.put(1, 5, -1);
-				p.put(1, 6, 0);
-				p.put(1, 7, 500*points[3].y);
-				p.put(1, 8, points[3].y); // y1'
+				p.put(7, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
+				p.put(7, 1, 0); // 
+				p.put(7, 2, 0);
+				p.put(7, 3, 0);
+				p.put(7, 4, -500);
+				p.put(7, 5, -1);
+				p.put(7, 6, 0);
+				p.put(7, 7, 500*points[3].y);
+				p.put(7, 8, points[3].y); // y1'
 				
-				Core.solve(p, zeros, h, Core.DECOMP_LU);
-				// h er nu 8x1, skal laves om til 3x3
+				/*
+				p.put(8, 0, 0);
+				p.put(8, 1, 0); 
+				p.put(8, 2, 0);
+				p.put(8, 3, 0);
+				p.put(8, 4, 0);
+				p.put(8, 5, 0);
+				p.put(8, 6, 0);
+				p.put(8, 7, 0);
+				p.put(8, 8, 1);*/
+				
+				
+				Core.solve(p, zeros, h, Core.DECOMP_NORMAL | Core.DECOMP_SVD);
+				// h er nu 9x1, skal laves om til 3x3
+				
+				Mat homography = new Mat(3,3,CvType.CV_64F);
+				homography.put(0, 0, h.get(0,0));
+				homography.put(0, 1, h.get(1,0));
+				homography.put(0, 2, h.get(2,0));
+				homography.put(1, 0, h.get(3,0));
+				homography.put(1, 1, h.get(4,0));
+				homography.put(1, 2, h.get(5,0));
+				homography.put(2, 0, h.get(6,0));
+				homography.put(2, 1, h.get(7,0));
+				homography.put(2, 2, 1);
 				
 		        Mat rectified = new Mat();
-		        Imgproc.warpPerspective(cameraImage, rectified, h, new Size(500,500));
+		        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
 		        UtilAR.imShow("key"+i,rectified);
 			}
 			
