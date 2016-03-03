@@ -197,17 +197,38 @@ public class Handin3part3 extends ApplicationAdapter {
 				instances.add(zAxisInstance);
 				instances.add(iBox);
 				
+				// H1 H2 H3
+				// H4 H5 H6
+				// H7 H8 1				
+				
+				// H1 x + H2 y + H3 = u (H7 x + H8 y + 1)	(Har divideret linie 1 med linie 3)
+				// H4 x + H5 y + H6 = v (H7 x + H8 y + 1)	(Har divideret linie 2 med linie 3)
+				
+				// H1 x + H2 y + H3 - u (H7 x + H8 y + 1) = 0
+				// H4 x + H5 y + H6 - v (H7 x + H8 y + 1) = 0
+				
+				// H1 x + H2 y + H3 - u H7 x - u H8 y - u = 0
+				// H4 x + H5 y + H6 - v H7 x - v H8 y - v = 0
+				
+				// H1x + H2y + H3 + 0H4x + 0H5y + 0H6 + (-uxH7) + (-uyH8) + (-u) = 0
+				// 0H1x + 0H2y + 0H3 + H4x + H5y + H6 + (-vxH7) + (-vyH8) + (-v) = 0
+				
+				// x + y + 1 + 0 + 0 + 0 -ux -uy -u = 0
+				// Eller
+				// x + y + 1 + 0 + 0 + 0 -ux -uy = u
+				
 				// Ekstra: Find selv homografien!
 				//Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
 				// PH = 0, hvor P er en 8x9 matrix med 8 ubekendte = vi kan løse den!
-				Mat h = new Mat(9,1,CvType.CV_64F);
-				Mat p = new Mat(8,9,CvType.CV_64F);
-				Mat zeros = new Mat(8,1,CvType.CV_64F);
+				// PH = P' 8x8 8x1 = 8x1
+				Mat h = new Mat(8,1,CvType.CV_64F);
+				Mat p = new Mat(8,8,CvType.CV_64F);
+				Mat res = new Mat(8,1,CvType.CV_64F);
 				
 				// Fyld zeroes ud
-				for(int j = 0; j < 8; j++) {
+				/*for(int j = 0; j < 8; j++) {
 					zeros.put(j, 0, 0);
-				}
+				}*/
 				
 				// x = object point, x' = image point
 				
@@ -220,7 +241,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(0, 5, 0);
 				p.put(0, 6, 0);
 				p.put(0, 7, 0);
-				p.put(0, 8, points[0].x); // x1'
+				res.put(0, 0, -points[0].x); // x1'
 				
 				p.put(1, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
 				p.put(1, 1, 0); // 
@@ -230,7 +251,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(1, 5, -1);
 				p.put(1, 6, 0);
 				p.put(1, 7, 0);
-				p.put(1, 8, points[0].y); // y1'
+				res.put(1, 0, -points[0].y); // y1'
 				
 				// Andet point = (500,0)
 				p.put(2, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
@@ -241,7 +262,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(2, 5, 0);
 				p.put(2, 6, 500*points[1].x);
 				p.put(2, 7, 0);
-				p.put(2, 8, points[1].x); // x1'
+				res.put(2, 0, -points[1].x); // x1'
 				
 				p.put(3, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
 				p.put(3, 1, 0); // 
@@ -251,7 +272,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(3, 5, -1);
 				p.put(3, 6, 500*points[1].y);
 				p.put(3, 7, 0);
-				p.put(3, 8, points[1].y); // y1'
+				res.put(3, 0, -points[1].y); // y1'
 				
 				// Tredje point = (500,500)
 				p.put(4, 0, -500); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
@@ -262,7 +283,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(4, 5, 0);
 				p.put(4, 6, 500*points[2].x);
 				p.put(4, 7, 500*points[2].x);
-				p.put(4, 8, points[2].x); // x1'
+				res.put(4, 0, -points[2].x); // x1'
 				
 				p.put(5, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
 				p.put(5, 1, 0); // 
@@ -272,7 +293,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(5, 5, -1);
 				p.put(5, 6, 500*points[2].y);
 				p.put(5, 7, 500*points[2].y);
-				p.put(5, 8, points[2].y); // y1'
+				res.put(5, 0, -points[2].y); // y1'
 				
 				// Fjerde point = (0,500)
 				p.put(6, 0, 0); // -x1 -y1 -1 0 0 0 x1x1' y1x1' x1'
@@ -283,7 +304,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(6, 5, 0);
 				p.put(6, 6, 0);
 				p.put(6, 7, 500*points[3].x);
-				p.put(6, 8, points[3].x); // x1'
+				res.put(6, 0, -points[3].x); // x1'
 				
 				p.put(7, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1' y1'
 				p.put(7, 1, 0); // 
@@ -293,7 +314,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(7, 5, -1);
 				p.put(7, 6, 0);
 				p.put(7, 7, 500*points[3].y);
-				p.put(7, 8, points[3].y); // y1'
+				res.put(7, 0, -points[3].y); // y1'
 				
 				/*
 				p.put(8, 0, 0);
@@ -307,8 +328,9 @@ public class Handin3part3 extends ApplicationAdapter {
 				p.put(8, 8, 1);*/
 				
 				
-				Core.solve(p, zeros, h, Core.DECOMP_NORMAL | Core.DECOMP_SVD);
-				// h er nu 9x1, skal laves om til 3x3
+				//Core.solve(p, zeros, h, Core.DECOMP_NORMAL | Core.DECOMP_SVD);
+				Core.solve(p, res, h, Core.DECOMP_SVD);
+				// h er nu 8x1, skal laves om til 3x3
 				
 				Mat homography = new Mat(3,3,CvType.CV_64F);
 				homography.put(0, 0, h.get(0,0));
@@ -321,6 +343,7 @@ public class Handin3part3 extends ApplicationAdapter {
 				homography.put(2, 1, h.get(7,0));
 				homography.put(2, 2, 1);
 				
+				homography = homography.inv();
 		        Mat rectified = new Mat();
 		        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
 		        UtilAR.imShow("key"+i,rectified);
