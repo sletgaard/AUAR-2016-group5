@@ -67,8 +67,11 @@ public class Handin4 extends ApplicationAdapter {
         
 		ModelBuilder modelBuilder = new ModelBuilder();
         boxModel = modelBuilder.createBox(1f, 1f, 1f, 
-            new Material(ColorAttribute.createDiffuse(Color.RED)),
+            new Material(ColorAttribute.createDiffuse(Color.BLACK)),
             Usage.Position | Usage.Normal);
+        boxInstance = new ModelInstance(boxModel);
+        
+        
 	}
 	
 	@Override
@@ -104,14 +107,37 @@ public class Handin4 extends ApplicationAdapter {
 			}
 		}
 		
-		Boolean redMarker = false;
-		Boolean blueMarker = false;
-		Boolean yellowMarker = false;
-		Boolean speedMarker = false;
-		Boolean m1Marker = false;
-		Boolean m2Marker = false;
-		Boolean m3Marker = false;
-		Boolean m4Marker = false;
+		Boolean redMarker = false; 
+		Boolean blueMarker = false; 
+		Boolean greenMarker = false; 
+		Boolean speedMarker = false; 
+		Boolean m1Marker = false; 
+		Boolean m2Marker = false; 
+		Boolean m3Marker = false; 
+		Boolean m4Marker = false; 
+		
+		//ColorZ
+		if (redMarker == true && blueMarker == false && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.RED)));
+		}
+		if(redMarker == false && blueMarker == false && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.GREEN)));
+		}
+		if (redMarker == false && blueMarker == true && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.BLUE)));
+		}
+		if(redMarker == true && blueMarker == true && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.PURPLE)));
+		}
+		if(redMarker == true && blueMarker == false && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.YELLOW)));
+		}
+		if(redMarker == false && blueMarker == true && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.CYAN)));
+		}
+		if(redMarker == true && blueMarker == true && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+		}
 			
 		/*
 		 * KODE DER SORTERER I MARKERS INDSÆTTES HER
