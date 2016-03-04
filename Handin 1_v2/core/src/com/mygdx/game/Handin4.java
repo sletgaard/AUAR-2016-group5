@@ -138,6 +138,9 @@ public class Handin4 extends ApplicationAdapter {
 		if(redMarker == true && blueMarker == true && greenMarker == true) {
 			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
 		}
+		if (redMarker == false && blueMarker == false && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.BLACK)));
+		}
 			
 		/*
 		 * KODE DER SORTERER I MARKERS INDSÆTTES HER
