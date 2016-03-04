@@ -46,7 +46,9 @@ public class Handin4 extends ApplicationAdapter {
     public Model yAxisModel;
     public Model zAxisModel;
     public Array<ModelInstance> instances = new Array<ModelInstance>();
-    public float angle;
+    public float step;
+    public int prevMarker = 0;
+    public int nextMarker = 0;
 	
 	@Override
 	public void create() {
@@ -127,6 +129,28 @@ public class Handin4 extends ApplicationAdapter {
 		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints);
 		
 		if (!results.isEmpty()) {
+			
+			Boolean draw = false;
+			
+			// Kode der bestemmer fra og til point
+			if(nextMarker == 0 && prevMarker == 0) { // Start
+				prevMarker = 1;
+				if(m2Marker) {
+					nextMarker = 2;
+				}
+				else if(m3Marker) {
+					nextMarker = 3;
+				}
+				else if(m4Marker) {
+					nextMarker = 4;
+				}
+				else {
+					// WELP!
+				}
+			}
+			
+			
+			
 
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
