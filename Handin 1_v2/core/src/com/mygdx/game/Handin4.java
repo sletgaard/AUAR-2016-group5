@@ -68,73 +68,38 @@ public class Handin4 extends ApplicationAdapter {
         
 		ModelBuilder modelBuilder = new ModelBuilder();
         boxModel = modelBuilder.createBox(1f, 1f, 1f, 
-            new Material(ColorAttribute.createDiffuse(Color.RED)),
+            new Material(ColorAttribute.createDiffuse(Color.BLACK)),
             Usage.Position | Usage.Normal);
+        boxInstance = new ModelInstance(boxModel);
         
-        xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(10,0,0), 
-				 new Material(ColorAttribute.createDiffuse(Color.RED)), 
-				 Usage.Position | Usage.Normal);
-		 
-		yAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,10,0), 
-				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
-				 Usage.Position | Usage.Normal);
-		 
-		zAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10), 
-				 new Material(ColorAttribute.createDiffuse(Color.YELLOW)), 
-				 Usage.Position | Usage.Normal);
         
 	}
 	
 	@Override
 	public void render() {
 		
-		angle = angle + 0.1f;
-        if(angle > 359) angle = 0f;
-		//angle++;
-		//angle = angle % 360;
-		
-		float x = (float) Math.cos(angle);
-		float y = 2.5f;
-	    float z = (float) Math.sin(angle);
-		
+		// Image
 		Mat cameraImage = new Mat();
-		camera.read(cameraImage);
-		
+		camera.read(cameraImage);	
 		Mat greyImage = new Mat();
-		Imgproc.cvtColor(cameraImage, greyImage, Imgproc.COLOR_BGR2GRAY);
-		
+		Imgproc.cvtColor(cameraImage, greyImage, Imgproc.COLOR_BGR2GRAY);	
 		Mat binaryImage = new Mat(greyImage.size(), greyImage.type());
 		Imgproc.threshold(greyImage, binaryImage, 100, 255, Imgproc.THRESH_BINARY);
 		
+		// Countours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Mat hierarchy = new Mat();
 		Imgproc.findContours(binaryImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-		/*  image - Source, an 8-bit single-channel image. Non-zero pixels are treated as 1's. Zero pixels remain 0's, so the image is treated as binary. You can use "compare", "inRange", "threshold", "adaptiveThreshold", "Canny", and others to create a binary image out of a grayscale or color one. The function modifies the image while extracting the contours.
-			contours - Detected contours. Each contour is stored as a vector of points.
-			hierarchy - Optional output vector, containing information about the image topology. It has as many elements as the number of contours. For each i-th contour contours[i], the elements hierarchy[i][0], hiearchy[i][1], hiearchy[i][2], and hiearchy[i][3] are set to 0-based indices in contours of the next and previous contours at the same hierarchical level, the first child contour and the parent contour, respectively. If for the contour i there are no next, previous, parent, or nested contours, the corresponding elements of hierarchy[i] will be negative.
-			mode - Contour retrieval mode.
-			
-		---	Brug IKKE RERT_EXTERNAL for extra points.
-			CV_RETR_EXTERNAL retrieves only the extreme outer contours. It sets hierarchy[i][2]=hierarchy[i][3]=-1 for all the contours.
-			CV_CHAIN_APPROX_SIMPLE compresses horizontal, vertical, and diagonal segments and leaves only their end points. For example, an up-right rectangular contour is encoded with 4 points.
-		 */
 		
+		// Markers
 		ArrayList<MatOfPoint> ap;
 		ap = new ArrayList<MatOfPoint>();
 		ArrayList<MatOfPoint> results = new ArrayList<MatOfPoint>();
-		outerloop:
 		for (int i=0; i<contours.size(); i++) {
 			Point[] contour = contours.get(i).toArray();
-			/*for (Point p : contour) {
-				if (p.x <= 1 || p.y <=1 || p.x >= cameraResolutionX-2 || p.y >= cameraResolutionY-2) {
-					continue outerloop;
-				}
-			}*/
+
 			MatOfPoint2f curve = new MatOfPoint2f(contour);
 			MatOfPoint2f approxCurve = new MatOfPoint2f();
-			// Check om vi har en firkant. Vi filtrerede dog for kurver og lignende
-			// oppe i findContours, så er dette skridt nødvendigt?
-			// Er dog nødvendigt for extra points :)
 			Imgproc.approxPolyDP(curve, approxCurve, Imgproc.arcLength(curve, true)*0.02, true);
 			if (approxCurve.toList().size() == 4 && Imgproc.contourArea(approxCurve,true) > 2000) {
 							
@@ -143,74 +108,77 @@ public class Handin4 extends ApplicationAdapter {
 			}
 		}
 		
+		Boolean redMarker = false; 
+		Boolean blueMarker = false; 
+		Boolean greenMarker = false; 
+		Boolean speedMarker = false; 
+		Boolean m1Marker = false; 
+		Boolean m2Marker = false; 
+		Boolean m3Marker = false; 
+		Boolean m4Marker = false; 
+		
+		//ColorZ
+		if (redMarker == true && blueMarker == false && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.RED)));
+		}
+		if(redMarker == false && blueMarker == false && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.GREEN)));
+		}
+		if (redMarker == false && blueMarker == true && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.BLUE)));
+		}
+		if(redMarker == true && blueMarker == true && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.PURPLE)));
+		}
+		if(redMarker == true && blueMarker == false && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.YELLOW)));
+		}
+		if(redMarker == false && blueMarker == true && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.CYAN)));
+		}
+		if(redMarker == true && blueMarker == true && greenMarker == true) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+		}
+		if (redMarker == false && blueMarker == false && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.BLACK)));
+		}
+			
+		/*
+		 * KODE DER SORTERER I MARKERS INDS�TTES HER
+		 */
+		
 		Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
-		// Til at sortere i vores resultater kan vi se på krydsproduktet, men også
-		// hierakiet. Vi kan også bruge approxCurve.total for at se på hvor lang edges er totalt,
-		// men kan vel være det samme som at sortere fra mht. counterArea.
 		
 		Point3[] objPoints = new Point3[4];
 		objPoints[0] = new Point3(-5,-5,0);
 		objPoints[1] = new Point3(5,-5,0);
 		objPoints[2] = new Point3(5,5,0);
 		objPoints[3] = new Point3(-5,5,0);
-		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints); // TODO: move to create()
-		
-		Point[] objPoints2 = new Point[4];
-		objPoints2[0] = new Point(0,0);
-		objPoints2[1] = new Point(500,0);
-		objPoints2[2] = new Point(500,500);
-		objPoints2[3] = new Point(0,500);
-		MatOfPoint2f objectPoints2 = new MatOfPoint2f(objPoints2);
+		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints);
 		
 		if (!results.isEmpty()) {
 
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
 			
-			//System.out.println(results.size());
-			for(int i = 0; i < results.size(); i++) {
-				MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(i).toArray());
+
+			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
 			
-				Mat rvec = new Mat();
-				Mat tvec = new Mat();
-				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
-						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
-			
-				ModelInstance xAxisInstance = new ModelInstance(xAxisModel);
-				ModelInstance yAxisInstance = new ModelInstance(yAxisModel);
-				ModelInstance zAxisInstance = new ModelInstance(zAxisModel);
-				ModelInstance iBox = new ModelInstance(boxModel);
-			        
-			    Vector3 v = new Vector3(x*2.5f,0,-z*2.5f);
-			    //iBox.transform.setToTranslation(v);
-			    
-				
-				UtilAR.setTransformByRT(rvec, tvec, xAxisInstance.transform);
-				UtilAR.setTransformByRT(rvec, tvec, yAxisInstance.transform);
-				UtilAR.setTransformByRT(rvec, tvec, zAxisInstance.transform);
-				UtilAR.setTransformByRT(rvec, tvec, iBox.transform);
-				iBox.transform.translate(v);
-				
-				instances.add(xAxisInstance);
-				instances.add(yAxisInstance);
-				instances.add(zAxisInstance);
-				instances.add(iBox);
-				
-				Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
-		        Mat rectified = new Mat();
-		        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
+			Mat rvec = new Mat();
+			Mat tvec = new Mat();
+			Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
+		
+			ModelInstance iBox = new ModelInstance(boxModel);
 		        
-		        Mat greyHomo = new Mat();
-				Imgproc.cvtColor(rectified, greyHomo, Imgproc.COLOR_BGR2GRAY);
-				Mat binaryHomo = new Mat(greyHomo.size(), greyHomo.type());
-				Imgproc.threshold(greyHomo, binaryHomo, 100, 255, Imgproc.THRESH_BINARY);
-				
-		        //averagePixels(binaryHomo);
-		        //bestMarkerMatch(binaryHomo, new Mat[] {binaryHomo});
-		        
-		        UtilAR.imShow("key"+i,rectified);
-			}
+		    Vector3 v = new Vector3(1*2.5f,0,1*2.5f);			    
 			
+
+			UtilAR.setTransformByRT(rvec, tvec, iBox.transform);
+			iBox.transform.translate(v);
+			
+			instances.add(iBox);
+		
 			UtilAR.imDrawBackground(cameraImage);
 			modelBatch.begin(libGdxCam);
 			modelBatch.render(instances, environment);
@@ -218,8 +186,7 @@ public class Handin4 extends ApplicationAdapter {
 	        
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
-		}
-		
+		}	
 	}
 
 	@Override
