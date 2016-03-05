@@ -1,10 +1,10 @@
 package com.mygdx.game;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -12,7 +12,6 @@ import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
@@ -33,6 +32,20 @@ import com.badlogic.gdx.utils.Array;
 
 public class Handin4 extends ApplicationAdapter {
 	
+	private static final int GRID_SIZE = 20;
+	private static final int NUMBER_OF_MARKERS = 8;
+	
+	private static final int ID_MARKER_1 = 0;
+	private static final int ID_MARKER_2 = 1;
+	private static final int ID_MARKER_3 = 2;
+	private static final int ID_MARKER_4 = 3;
+	private static final int ID_MARKER_RED = 4;
+	private static final int ID_MARKER_GREEN = 5;
+	private static final int ID_MARKER_BLUE = 6;
+	private static final int ID_MARKER_SPEED = 7;
+	
+	private int[][][] averagedMarkers = new int[NUMBER_OF_MARKERS][GRID_SIZE][GRID_SIZE];
+	
 	public PerspectiveOffCenterCamera libGdxCam;
 	Mat cameraMatrix;
 	VideoCapture camera;
@@ -51,6 +64,11 @@ public class Handin4 extends ApplicationAdapter {
 	
 	@Override
 	public void create() {
+		String[] paths = {"../core/assets/cMarker.png"};
+		for (String path : paths) {
+			//TODO: Load images into averagedMarkers
+		}
+		
 		libGdxCam = new PerspectiveOffCenterCamera();
 		cameraMatrix = UtilAR.getDefaultIntrinsics(640f, 480f);
 		libGdxCam.setByIntrinsics(cameraMatrix, 640f, 480f);
@@ -207,12 +225,12 @@ public class Handin4 extends ApplicationAdapter {
 			int[][] averagedMarker = averagePixels(marker);
 			double percentage = 0;
 			
-			for (int c=0; c<gridSize; c++) {
-				for (int r=0; r<gridSize; r++) {
+			for (int c=0; c<GRID_SIZE; c++) {
+				for (int r=0; r<GRID_SIZE; r++) {
 					percentage += Math.abs(averagedFoundMarker[c][r]-averagedMarker[c][r]);
 				}
 			}
-			percentage = ((255D - (percentage / (double) (gridSize*gridSize))) / 255D ) * 100D;
+			percentage = ((255D - (percentage / (double) (GRID_SIZE*GRID_SIZE))) / 255D ) * 100D;
 			if (percentage > bestMatchPercentage) {
 				bestMatch = i;
 				bestMatchPercentage = percentage;
@@ -222,16 +240,15 @@ public class Handin4 extends ApplicationAdapter {
 		return bestMatch;
 	}
 	
-	private int gridSize = 20;
 	
 	public int[][] averagePixels(Mat greyscaleImage) {
-		int[][] grid20 = new int[gridSize][gridSize];
-		int[][] grid20Count = new int[gridSize][gridSize];
+		int[][] grid20 = new int[GRID_SIZE][GRID_SIZE];
+		int[][] grid20Count = new int[GRID_SIZE][GRID_SIZE];
 		
 		int cols = greyscaleImage.cols();
 		int rows = greyscaleImage.rows();
-		double pixelPrRow = ((double) rows) / (double) gridSize;
-		double pixelPrCol = ((double) cols) / (double) gridSize;
+		double pixelPrRow = ((double) rows) / (double) GRID_SIZE;
+		double pixelPrCol = ((double) cols) / (double) GRID_SIZE;
 		
 		for(int c=0; c<cols; c++) {
 			for(int r=0; r<rows; r++) {
@@ -244,8 +261,8 @@ public class Handin4 extends ApplicationAdapter {
 			}
 		}
 		
-		for(int c=0; c<gridSize; c++) {
-			for(int r=0; r<gridSize; r++) {
+		for(int c=0; c<GRID_SIZE; c++) {
+			for(int r=0; r<GRID_SIZE; r++) {
 				grid20[c][r] = grid20[c][r] / grid20Count[c][r];
 			}
 		}
