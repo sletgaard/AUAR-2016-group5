@@ -13,6 +13,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
@@ -166,7 +167,7 @@ public class Handin4 extends ApplicationAdapter {
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
 			
-			System.out.println(results.size());
+			//System.out.println(results.size());
 			for(int i = 0; i < results.size(); i++) {
 				MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(i).toArray());
 			
@@ -198,6 +199,15 @@ public class Handin4 extends ApplicationAdapter {
 				Mat homography = Calib3d.findHomography(imagePoints, objectPoints2);
 		        Mat rectified = new Mat();
 		        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(500,500));
+		        
+		        Mat greyHomo = new Mat();
+				Imgproc.cvtColor(rectified, greyHomo, Imgproc.COLOR_BGR2GRAY);
+				Mat binaryHomo = new Mat(greyHomo.size(), greyHomo.type());
+				Imgproc.threshold(greyHomo, binaryHomo, 100, 255, Imgproc.THRESH_BINARY);
+				
+		        //averagePixels(binaryHomo);
+		        //bestMarkerMatch(binaryHomo, new Mat[] {binaryHomo});
+		        
 		        UtilAR.imShow("key"+i,rectified);
 			}
 			
@@ -218,4 +228,75 @@ public class Handin4 extends ApplicationAdapter {
 		modelBatch.dispose();
 		boxModel.dispose();
 	}
+	
+	
+	public int bestMarkerMatch(Mat foundMarker, Mat[] markers) {
+		int bestMatch = -1;
+		double bestMatchPercentage = -1;
+		
+		int[][] averagedFoundMarker = averagePixels(foundMarker);
+		for (int i=0; i<markers.length; i++) {
+			Mat marker = markers[i];
+			int[][] averagedMarker = averagePixels(marker);
+			double percentage = 0;
+			
+			for (int c=0; c<gridSize; c++) {
+				for (int r=0; r<gridSize; r++) {
+					percentage += Math.abs(averagedFoundMarker[c][r]-averagedMarker[c][r]);
+				}
+			}
+			percentage = ((255D - (percentage / (double) (gridSize*gridSize))) / 255D ) * 100D;
+			if (percentage > bestMatchPercentage) {
+				bestMatch = i;
+				bestMatchPercentage = percentage;
+			}
+		}
+		
+		return bestMatch;
+	}
+	
+	private int gridSize = 20;
+	
+	public int[][] averagePixels(Mat greyscaleImage) {
+		int[][] grid20 = new int[gridSize][gridSize];
+		int[][] grid20Count = new int[gridSize][gridSize];
+		
+		int cols = greyscaleImage.cols();
+		int rows = greyscaleImage.rows();
+		double pixelPrRow = ((double) rows) / (double) gridSize;
+		double pixelPrCol = ((double) cols) / (double) gridSize;
+		
+		for(int c=0; c<cols; c++) {
+			for(int r=0; r<rows; r++) {
+				int value = (int) greyscaleImage.get(r, c)[0];
+				int r20 = (int) (r/pixelPrRow);
+				int c20 = (int) (c/pixelPrCol);
+				
+				grid20[c20][r20] = grid20[c20][r20] + value;
+				grid20Count[c20][r20] = grid20Count[c20][r20] + 1;
+			}
+		}
+		
+		for(int c=0; c<gridSize; c++) {
+			for(int r=0; r<gridSize; r++) {
+				grid20[c][r] = grid20[c][r] / grid20Count[c][r];
+			}
+		}
+		
+		return grid20;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
