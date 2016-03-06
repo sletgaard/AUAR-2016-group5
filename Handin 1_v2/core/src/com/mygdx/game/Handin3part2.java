@@ -179,6 +179,7 @@ public class Handin3part2 extends ApplicationAdapter {
 				ModelInstance yAxisInstance = new ModelInstance(yAxisModel);
 				ModelInstance zAxisInstance = new ModelInstance(zAxisModel);
 				ModelInstance iBox = new ModelInstance(boxModel);
+				
 			        
 			    Vector3 v = new Vector3(x*2.5f,0,-z*2.5f);
 			    //iBox.transform.setToTranslation(v);
@@ -208,6 +209,7 @@ public class Handin3part2 extends ApplicationAdapter {
 	        
 		} else {
 			UtilAR.imDrawBackground(cameraImage);
+			
 		}
 		
 	}
