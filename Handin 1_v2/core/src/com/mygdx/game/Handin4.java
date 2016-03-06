@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.opencv.calib3d.Calib3d;
@@ -49,6 +50,11 @@ public class Handin4 extends ApplicationAdapter {
     public float step;
     public int prevMarker = 0;
     public int nextMarker = 0;
+    public float x = 0;
+    public float y = 0;
+    public float z = 0;
+    public float speed = 10;
+    public Material material;
 	
 	@Override
 	public void create() {
@@ -73,6 +79,9 @@ public class Handin4 extends ApplicationAdapter {
             Usage.Position | Usage.Normal);
         boxInstance = new ModelInstance(boxModel);
         
+        xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10), 
+				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
+				 Usage.Position | Usage.Normal);
         
 	}
 	
@@ -118,6 +127,10 @@ public class Handin4 extends ApplicationAdapter {
 		Boolean m3Marker = false; 
 		Boolean m4Marker = false; 
 		
+		/*
+		 * KODE DER SORTERER I MARKERS INDSÆTTES HER
+		 */
+		
 		//ColorZ
 		if (redMarker == true && blueMarker == false && greenMarker == false) {
 			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.RED)));
@@ -141,9 +154,7 @@ public class Handin4 extends ApplicationAdapter {
 			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
 		}
 			
-		/*
-		 * KODE DER SORTERER I MARKERS INDSÆTTES HER
-		 */
+		
 		
 		Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 		
@@ -154,30 +165,9 @@ public class Handin4 extends ApplicationAdapter {
 		objPoints[3] = new Point3(-5,5,0);
 		MatOfPoint3f objectPoints = new MatOfPoint3f(objPoints);
 		
-		if (!results.isEmpty()) {
+		if (m1Marker) {
 			
-			Boolean draw = false;
-			
-			// Kode der bestemmer fra og til point
-			if(nextMarker == 0 && prevMarker == 0) { // Start
-				prevMarker = 1;
-				if(m2Marker) {
-					nextMarker = 2;
-				}
-				else if(m3Marker) {
-					nextMarker = 3;
-				}
-				else if(m4Marker) {
-					nextMarker = 4;
-				}
-				else {
-					// WELP!
-				}
-			}
-			
-			
-			
-
+			// Marker 1 er centrum for verden
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
 			
@@ -186,16 +176,118 @@ public class Handin4 extends ApplicationAdapter {
 			Mat rvec = new Mat();
 			Mat tvec = new Mat();
 			Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
-					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);
-		
-			ModelInstance iBox = new ModelInstance(boxModel);
-		        
-		    Vector3 v = new Vector3(1*2.5f,0,1*2.5f);			    
+					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);					
 			
-			UtilAR.setTransformByRT(rvec, tvec, iBox.transform);
-			iBox.transform.translate(v);
+			float x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4; // Kan ikke init med = 0;
+			x1 = 0;
+			x2 = 0;
+			x3 = 0;
+			x4 = 0;
+			y1 = 0;
+			y2 = 0;
+			y3 = 0;
+			y4 = 0;
+			z1 = 0;
+			z2 = 0;
+			z3 = 0;
+			z4 = 0;			
 			
-			instances.add(iBox);
+			Vector3 v = new Vector3(0,0,0);
+			Boolean draw = false;
+			int markers = 1;
+			
+			ModelInstance a1 = new ModelInstance(xAxisModel);
+			ModelInstance a2, a3, a4;
+			a2 = null;
+			a3 = null;
+			a4 = null;
+			
+			UtilAR.setTransformByRT(rvec, tvec, a1.transform);
+			instances.add(a1);
+			Vector3 v1 = a1.transform.getTranslation(v);
+			x1 = 0;
+			y1 = 0;
+			z1 = 0;
+			if(m2Marker) {
+				markers++;
+				imagePoints = new MatOfPoint2f(results.get(1).toArray());
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
+				a2 = new ModelInstance(xAxisModel);
+				UtilAR.setTransformByRT(rvec, tvec, a2.transform);
+				instances.add(a2);
+				Vector3 v2 = a2.transform.getTranslation(v1);
+				x2 = v2.x;
+				y2 = v2.y;
+				z2 = v2.z;
+			}
+			if(m3Marker) {
+				markers++;
+				imagePoints = new MatOfPoint2f(results.get(2).toArray());
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
+				a3 = new ModelInstance(xAxisModel);
+				UtilAR.setTransformByRT(rvec, tvec, a3.transform);
+				instances.add(a3);
+				Vector3 v3 = a3.transform.getTranslation(v1);
+				x3 = v3.x;
+				y3 = v3.y;
+				z3 = v3.z;
+			}
+			if(m4Marker) {
+				markers++;
+				imagePoints = new MatOfPoint2f(results.get(3).toArray());
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
+				a4 = new ModelInstance(xAxisModel);
+				UtilAR.setTransformByRT(rvec, tvec, a4.transform);
+				instances.add(a4);
+				Vector3 v4 = a4.transform.getTranslation(v1);
+				x4 = v4.x;
+				y4 = v4.y;
+				z4 = v4.z;
+			}
+			
+			if(markers == 1) {
+				// Vi har kun en marker, flyv hen imod den.
+				// m1 er altid til stede, så det må være den.
+				prevMarker = nextMarker;
+				nextMarker = 1;
+				draw = true;
+				
+			}
+			else {
+				// Flere markers
+				// Er vi nået til destinationen?
+				if(reachedDestination(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4)) {
+					// Find ny destination.
+					setNextMarker(m1Marker, m2Marker, m3Marker, m4Marker);
+					draw = true;
+				}
+				else {
+					// Ikke nået til destinationen.
+					draw = true;
+				}
+			}
+			
+			if(draw) { // Note at med dette setup er draw altid true
+				// Incrementer flyets position.
+				Vector3 flightVector = getFlightVector(a1,a2,a3,a4);
+				float total = flightVector.x + flightVector.y + flightVector.z;
+				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
+				if(flightVector.z != 0) z = z+(speed*(total/flightVector.z));
+				Vector3 fly = new Vector3(x,y,z);			    
+			
+				// Genfind rvec og tvec for m1
+				imagePoints = new MatOfPoint2f(results.get(0).toArray());
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
+				// Placer flyet.
+				UtilAR.setTransformByRT(rvec, tvec, boxInstance.transform);
+				boxInstance.transform.translate(fly);
+				instances.add(boxInstance);
+			}
 		
 			UtilAR.imDrawBackground(cameraImage);
 			modelBatch.begin(libGdxCam);
@@ -212,5 +304,112 @@ public class Handin4 extends ApplicationAdapter {
 		camera.release();
 		modelBatch.dispose();
 		boxModel.dispose();
+	}
+	
+	public void setNextMarker(boolean m1Marker, boolean m2Marker, boolean m3Marker, boolean m4Marker) {
+		if(nextMarker == 1) {
+			if(m2Marker) {
+				nextMarker = 2;
+				prevMarker = 1;
+			}
+			else if(m3Marker) {
+				nextMarker = 3;
+				prevMarker = 1;
+			}
+			else {
+				nextMarker = 4;
+				prevMarker = 1;
+			}
+		}
+		else if(nextMarker == 2) {
+			if(m3Marker) {
+				nextMarker = 3;
+				prevMarker = 2;
+			}
+			else if(m4Marker) {
+				nextMarker = 4;
+				prevMarker = 2;
+			}
+			else {
+				nextMarker = 1;
+				prevMarker = 2;
+			}
+		}
+		else if(nextMarker == 3) {
+			if(m4Marker) {
+				nextMarker = 4;
+				prevMarker = 3;
+			}
+			else if(m1Marker) {
+				nextMarker = 1;
+				prevMarker = 3;
+			}
+			else {
+				nextMarker = 2;
+				prevMarker = 3;
+			}
+		}
+		else {
+			if(m1Marker) {
+				nextMarker = 1;
+				prevMarker = 4;
+			}
+			else if(m2Marker) {
+				nextMarker = 2;
+				prevMarker = 4;
+			}
+			else {
+				nextMarker = 3;
+				prevMarker = 4;
+			}
+		}
+	}
+	
+	public boolean reachedDestination(float x1, float x2, float x3, float x4,
+			float y1, float y2, float y3, float y4, float z1, float z2, float z3, float z4) {
+		
+		float dx, dy, dz = 0;
+		if(nextMarker == 1) {
+			dx = x1;
+			dy = y1;
+			dz = z1;
+		}
+		else if(nextMarker == 2) {
+			dx = x2;
+			dy = y2;
+			dz = z2;
+		}
+		else if(nextMarker == 3) {
+			dx = x3;
+			dy = y3;
+			dz = z3;
+		}
+		else {
+			dx = x4;
+			dy = y4;
+			dz = z4;
+		}
+		
+		double distance = Math.sqrt(Math.pow(x-dx, 2)+Math.pow(y-dy, 2)+Math.pow(z-dz, 2));
+		return (distance <= speed);
+	}
+	
+	public Vector3 getFlightVector(ModelInstance a1, ModelInstance a2, ModelInstance a3, ModelInstance a4) {
+		
+		Vector3 res;
+		Vector3 v = new Vector3(x,y,z);
+		if(nextMarker == 1) {
+			res = a1.transform.getTranslation(v);
+		}
+		else if(nextMarker == 2) {
+			res = a2.transform.getTranslation(v);
+		}
+		else if(nextMarker == 3) {
+			res = a3.transform.getTranslation(v);
+		}
+		else {
+			res = a4.transform.getTranslation(v);
+		}		
+		return res;	
 	}
 }
