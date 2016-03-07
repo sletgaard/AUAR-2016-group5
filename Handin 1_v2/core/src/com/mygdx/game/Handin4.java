@@ -13,6 +13,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
@@ -31,6 +32,22 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 public class Handin4 extends ApplicationAdapter {
+	
+	private static final int GRID_SIZE = 20;
+	private static final int NUMBER_OF_MARKERS = 8;
+	
+	private static final int ID_MARKER_1 = 0;
+	private static final int ID_MARKER_2 = 1;
+	private static final int ID_MARKER_3 = 2;
+	private static final int ID_MARKER_4 = 3;
+	private static final int ID_MARKER_RED = 4;
+	private static final int ID_MARKER_GREEN = 5;
+	private static final int ID_MARKER_BLUE = 6;
+	private static final int ID_MARKER_SPEED = 7;
+	
+	private int[][][] averagedMarkers = new int[NUMBER_OF_MARKERS][GRID_SIZE][GRID_SIZE];
+	private static final int homoSize = 500;
+	MatOfPoint2f homoPoints;
 	
 	public PerspectiveOffCenterCamera libGdxCam;
 	Mat cameraMatrix;
@@ -57,6 +74,19 @@ public class Handin4 extends ApplicationAdapter {
 	
 	@Override
 	public void create() {
+		String dir = "../core/assets/";
+		String[] files = {"base.png", "point1.png", "point2.png", "point3.png",
+				"red.png", "green.png", "blue.png", "speed.png"};
+		for (int i=0; i<files.length; i++) {
+			String file = dir + files[i];
+			Mat marker = Imgcodecs.imread(file);
+			Mat greyMarker = new Mat();
+			Imgproc.cvtColor(marker, greyMarker, Imgproc.COLOR_BGR2GRAY);	
+			Mat binaryMarker = new Mat(greyMarker.size(), greyMarker.type());
+			Imgproc.threshold(greyMarker, binaryMarker, 100, 255, Imgproc.THRESH_BINARY);
+			averagedMarkers[i] = averagePixels(binaryMarker);
+		}
+		
 		libGdxCam = new PerspectiveOffCenterCamera();
 		cameraMatrix = UtilAR.getDefaultIntrinsics(640f, 480f);
 		libGdxCam.setByIntrinsics(cameraMatrix, 640f, 480f);
@@ -126,9 +156,55 @@ public class Handin4 extends ApplicationAdapter {
 		Boolean m3Marker = false; 
 		Boolean m4Marker = false; 
 		
-		/*
-		 * KODE DER SORTERER I MARKERS INDSÆTTES HER
-		 */
+		for(int i=0; i<results.size(); i++) {
+			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(i).toArray());
+			
+			Point[] objPoints = new Point[4];
+			objPoints[0] = new Point(0,0);
+			objPoints[1] = new Point(homoSize,0);
+			objPoints[2] = new Point(homoSize,homoSize);
+			objPoints[3] = new Point(0,homoSize);
+			homoPoints = new MatOfPoint2f(objPoints);
+			
+	        Mat homography = Calib3d.findHomography(imagePoints, homoPoints);
+	        Mat rectified = new Mat();
+	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(homoSize,homoSize));
+	        //UtilAR.imShow("key"+i,rectified);
+	        
+	        int[] match = bestMarkerMatch(rectified);
+	        
+	        // Cutoff threshold
+	        if (match[1] < 20) {
+	        	//continue;
+	        }
+	        
+	        switch (match[0]) {
+	        	case ID_MARKER_1:
+	        		m1Marker = true;
+	        		break;
+	        	case ID_MARKER_2:
+	        		m2Marker = true;
+	        		break;
+	        	case ID_MARKER_3:
+	        		m3Marker = true;
+	        		break;
+	        	case ID_MARKER_4:
+	        		m4Marker = true;
+	        		break;
+	        	case ID_MARKER_RED:
+	        		redMarker = true;
+	        		break;
+	        	case ID_MARKER_GREEN:
+	        		greenMarker = true;
+	        		break;
+	        	case ID_MARKER_BLUE:
+	        		blueMarker = true;
+	        		break;
+	        	case ID_MARKER_SPEED:
+	        		speedMarker = true;
+	        		break;
+	        }
+		}
 		
 		//ColorZ
 		if (redMarker == true && blueMarker == false && greenMarker == false) {
@@ -410,5 +486,71 @@ public class Handin4 extends ApplicationAdapter {
 			res = a4.transform.getTranslation(v);
 		}		
 		return res;	
+	}
+	
+	/**
+	 * 
+	 * @param foundMarker
+	 * @return {bestMatch, bestMatchPercentage, orientation}
+	 */
+	public int[] bestMarkerMatch(Mat foundMarker) {
+		int bestMatch = -1;
+		double bestMatchPercentage = -1;
+		int orientation = 0;
+		
+		int[][] averagedFoundMarker = averagePixels(foundMarker);
+		for (int i=0; i<NUMBER_OF_MARKERS; i++) {
+			int[][] averagedMarker = averagedMarkers[i];
+			double percentage[] = new double[4];
+			
+			for (int c=0; c<GRID_SIZE; c++) {
+				for (int r=0; r<GRID_SIZE; r++) {
+					percentage[0] += Math.abs(averagedFoundMarker[c][r]-averagedMarker[c][r]);
+					percentage[1] += Math.abs(averagedFoundMarker[GRID_SIZE-1-r][c]-averagedMarker[c][r]);
+					percentage[2] += Math.abs(averagedFoundMarker[GRID_SIZE-1-c][GRID_SIZE-1-r]-averagedMarker[c][r]);
+					percentage[3] += Math.abs(averagedFoundMarker[r][GRID_SIZE-1-c]-averagedMarker[c][r]);
+				}
+			}
+			for(int p=0; p<percentage.length; p++) {
+				percentage[p] = ((255D - (percentage[p] / (double) (GRID_SIZE*GRID_SIZE))) / 255D ) * 100D;
+				if (percentage[p] > bestMatchPercentage) {
+					bestMatch = i;
+					bestMatchPercentage = percentage[p];
+					orientation = p*90;
+				}
+			}
+		}
+		
+		return new int[] {bestMatch, (int) Math.round(bestMatchPercentage), orientation};
+	}
+	
+	
+	public int[][] averagePixels(Mat greyscaleImage) {
+		int[][] grid20 = new int[GRID_SIZE][GRID_SIZE];
+		int[][] grid20Count = new int[GRID_SIZE][GRID_SIZE];
+		
+		int cols = greyscaleImage.cols();
+		int rows = greyscaleImage.rows();
+		double pixelPrRow = ((double) rows) / (double) GRID_SIZE;
+		double pixelPrCol = ((double) cols) / (double) GRID_SIZE;
+		
+		for(int c=0; c<cols; c++) {
+			for(int r=0; r<rows; r++) {
+				int value = (int) greyscaleImage.get(r, c)[0];
+				int r20 = (int) (r/pixelPrRow);
+				int c20 = (int) (c/pixelPrCol);
+				
+				grid20[c20][r20] = grid20[c20][r20] + value;
+				grid20Count[c20][r20] = grid20Count[c20][r20] + 1;
+			}
+		}
+		
+		for(int c=0; c<GRID_SIZE; c++) {
+			for(int r=0; r<GRID_SIZE; r++) {
+				grid20[c][r] = grid20[c][r] / grid20Count[c][r];
+			}
+		}
+		
+		return grid20;
 	}
 }
