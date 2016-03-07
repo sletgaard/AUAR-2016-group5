@@ -60,6 +60,7 @@ public class Handin4 extends ApplicationAdapter {
     public ModelBatch modelBatch;
     public ModelInstance boxInstance;
     public Model boxModel;
+    public Model fullMarkerBoxModel;
     public Model xAxisModel;
     public Model yAxisModel;
     public Model zAxisModel;
@@ -126,6 +127,10 @@ public class Handin4 extends ApplicationAdapter {
             new Material(ColorAttribute.createDiffuse(Color.BLACK)),
             Usage.Position | Usage.Normal);
         boxInstance = new ModelInstance(boxModel);
+        
+        fullMarkerBoxModel = modelBuilder.createBox(10f, 10f, 10f, 
+        		new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+        		Usage.Position | Usage.Normal);
         
         xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10), 
 				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
@@ -258,8 +263,6 @@ public class Handin4 extends ApplicationAdapter {
 		if(redMarker == true && blueMarker == true && greenMarker == true) {
 			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
 		}
-			
-		
 		
 		//Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 		
@@ -296,6 +299,7 @@ public class Handin4 extends ApplicationAdapter {
 			UtilAR.setTransformByRT(rvec, tvec, a1.transform);
 			instances.add(a1);
 			Vector3 v1 = a1.transform.getTranslation(v);
+			System.out.println(v1);
 			float xx = v1.x;
 			float xy = v1.y;
 			float xz = v1.z;
@@ -311,6 +315,8 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a2.transform);
 				instances.add(a2);
 				Vector3 v2 = a2.transform.getTranslation(v);
+				System.out.println(v1);
+				System.out.println(v2);
 				x2 = v2.x - xx;
 				y2 = v2.y - xy;
 				z2 = v2.z - xz;
@@ -366,6 +372,31 @@ public class Handin4 extends ApplicationAdapter {
 					draw = true;
 				}
 			}
+			
+			if(speedMarker) {
+				// Find placeringen af speed
+				imagePoints = new MatOfPoint2f(sortedMarkerResults[ID_MARKER_SPEED].toArray());
+				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
+						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
+				ModelInstance a5 = new ModelInstance(xAxisModel);
+				UtilAR.setTransformByRT(rvec, tvec, a5.transform);
+				Vector3 v5 = a5.transform.getTranslation(v);
+				sx = v5.x - xx;
+				sy = v5.y - xy;
+				sz = v5.z - xz;
+				
+				double distance = Math.sqrt(Math.pow(sx,2)+Math.pow(sy,2)+Math.pow(sz, 2));
+				int factor = (int) (distance / 10);
+				if(factor == 0) factor = 1;
+				speed = basespeed * factor;
+			}
+			else {
+				speed = basespeed;
+			}
+			
+			
+			
+			
 			System.out.println("1: " + x1 + ", " + y1 + ", " + z1);
 			Vector3 test1 = a1.transform.getTranslation(new Vector3());
 			System.out.println("t1: " + test1.x + ", " + test1.y + ", " + test1.z);
@@ -374,18 +405,23 @@ public class Handin4 extends ApplicationAdapter {
 				Vector3 test2 = a2.transform.getTranslation(new Vector3());
 				System.out.println("t2: " + test2.x + ", " + test2.y + ", " + test2.z);
 			}
+			System.out.println("next: " + nextMarker + ", prev: " + prevMarker);
 			if(draw) { // Note at med dette setup er draw altid true
 				// Incrementer flyets position.
 				Vector3 flightVector = getFlightVector();
-				float total = flightVector.x + flightVector.y + flightVector.z;
-				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
-				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
-				if(flightVector.z != 0) z = z+(speed*(total/flightVector.z));
-				//Vector3 fly = new Vector3(x,y,z);			    
-				Vector3 fly = new Vector3();
-				if(flightVector.x != 0)	fly.x = (speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
-				if(flightVector.y != 0) fly.y = (speed*(total/flightVector.y));
-				if(flightVector.z != 0) fly.z = (speed*(total/flightVector.z));
+				System.out.println("plane: " + x + ", " + y + ", " + z);
+				System.out.println("FlightVector: " + flightVector);
+				float total = Math.abs(flightVector.x) + Math.abs(flightVector.y) + Math.abs(flightVector.z);
+				if(flightVector.x != 0)	x = x+(speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) y = y+(speed*(flightVector.y/total));
+				if(flightVector.z != 0) z = z+(speed*(flightVector.z/total));
+				System.out.println("plane2: " + x + ", " + y + ", " + z);
+				Vector3 fly = new Vector3(x,y,z);
+				Vector3 fly2 = new Vector3();
+				if(flightVector.x != 0)	fly2.x = (speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) fly2.y = (speed*(flightVector.y/total));
+				if(flightVector.z != 0) fly2.z = (speed*(flightVector.z/total));
+				System.out.println("fly2: " + fly2);
 				
 			
 				// Genfind rvec og tvec for m1
@@ -393,9 +429,19 @@ public class Handin4 extends ApplicationAdapter {
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				// Placer flyet.
+				Vector3 planePos = boxInstance.transform.getTranslation(new Vector3());
+				boxInstance.transform.translate(-planePos.x, -planePos.y, -planePos.z);
+				Vector3 newPlanePos = new Vector3(fly.x + xx, fly.y + xy, fly.z + xz);
+				boxInstance.transform.translate(newPlanePos);
+				/*
+				System.out.println("box1 " + boxInstance.transform.getTranslation(new Vector3()));
 				UtilAR.setTransformByRT(rvec, tvec, boxInstance.transform);
+				System.out.println("box2 " + boxInstance.transform.getTranslation(new Vector3()));
 				//System.out.println(fly.x + ", " + fly.y + ", " + fly.z);
+				System.out.println("fly: " + fly);
 				boxInstance.transform.translate(fly);
+				System.out.println("box3 " + boxInstance.transform.getTranslation(new Vector3()));
+				*/
 				instances.add(boxInstance);
 			}
 		
