@@ -178,7 +178,7 @@ public class Handin4 extends ApplicationAdapter {
 			
 	        Mat rectified = new Mat();
 	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(homoSize,homoSize));
-	        UtilAR.imShow("key"+i,rectified);
+	        //UtilAR.imShow("key"+i,rectified);
 	        
 	        int[] match = bestMarkerMatch(rectified);
 	        
@@ -186,7 +186,7 @@ public class Handin4 extends ApplicationAdapter {
 	        if (match[1] < 80) {
 	        	continue;
 	        }
-	        System.out.println("Marker " + match[0] + ": " + match[1]);
+	        //System.out.println("Marker " + match[0] + ": " + match[1]);
 	        Imgproc.drawContours(cameraImage, results, i, new Scalar(0,0,255));
 	        
 	        sortedMarkerResults[match[0]] = imagePoints;
@@ -277,7 +277,7 @@ public class Handin4 extends ApplicationAdapter {
 			z1 = 0;
 			z2 = 0;
 			z3 = 0;
-			z4 = 0;			
+			z4 = 0;
 			
 			Vector3 v = new Vector3(0,0,0);
 			Boolean draw = false;
@@ -334,7 +334,10 @@ public class Handin4 extends ApplicationAdapter {
 				y4 = v4.y;
 				z4 = v4.z;
 			}
-			
+			if(nextMarker == 0){
+				nextMarker = 1;
+				prevMarker = 1;
+			}
 			if(markers == 1) {
 				// Vi har kun en marker, flyv hen imod den.
 				// m1 er altid til stede, så det må være den.
@@ -356,7 +359,14 @@ public class Handin4 extends ApplicationAdapter {
 					draw = true;
 				}
 			}
-			
+			System.out.println("1: " + x1 + ", " + y1 + ", " + z1);
+			Vector3 test1 = a1.transform.getTranslation(new Vector3());
+			System.out.println("t1: " + test1.x + ", " + test1.y + ", " + test1.z);
+			System.out.println("2: " + x2 + ", " + y2 + ", " + z2);
+			if (m2Marker) {
+				Vector3 test2 = a2.transform.getTranslation(new Vector3());
+				System.out.println("t2: " + test2.x + ", " + test2.y + ", " + test2.z);
+			}
 			if(draw) { // Note at med dette setup er draw altid true
 				// Incrementer flyets position.
 				Vector3 flightVector = getFlightVector(a1,a2,a3,a4);
@@ -364,7 +374,12 @@ public class Handin4 extends ApplicationAdapter {
 				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
 				if(flightVector.z != 0) z = z+(speed*(total/flightVector.z));
-				Vector3 fly = new Vector3(x,y,z);			    
+				//Vector3 fly = new Vector3(x,y,z);			    
+				Vector3 fly = new Vector3();
+				if(flightVector.x != 0)	fly.x = (speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) fly.y = (speed*(total/flightVector.y));
+				if(flightVector.z != 0) fly.z = (speed*(total/flightVector.z));
+				
 			
 				// Genfind rvec og tvec for m1
 				imagePoints = new MatOfPoint2f(sortedMarkerResults[0].toArray());
@@ -372,6 +387,7 @@ public class Handin4 extends ApplicationAdapter {
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				// Placer flyet.
 				UtilAR.setTransformByRT(rvec, tvec, boxInstance.transform);
+				//System.out.println(fly.x + ", " + fly.y + ", " + fly.z);
 				boxInstance.transform.translate(fly);
 				instances.add(boxInstance);
 			}
