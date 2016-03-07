@@ -155,7 +155,9 @@ public class Handin4 extends ApplicationAdapter {
 		Boolean m1Marker = false; 
 		Boolean m2Marker = false; 
 		Boolean m3Marker = false; 
-		Boolean m4Marker = false; 
+		Boolean m4Marker = false;
+		
+		MatOfPoint2f[] sortedMarkerResults = new MatOfPoint2f[NUMBER_OF_MARKERS];
 		
 		for(int i=0; i<results.size(); i++) {
 			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(i).toArray());
@@ -185,6 +187,7 @@ public class Handin4 extends ApplicationAdapter {
 	        	//continue;
 	        }
 	        
+	        sortedMarkerResults[match[0]] = imagePoints;
 	        switch (match[0]) {
 	        	case ID_MARKER_1:
 	        		m1Marker = true;
@@ -238,7 +241,7 @@ public class Handin4 extends ApplicationAdapter {
 			
 		
 		
-		Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
+		//Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 		
 		Point3[] objPoints = new Point3[4];
 		objPoints[0] = new Point3(-5,-5,0);
@@ -253,7 +256,7 @@ public class Handin4 extends ApplicationAdapter {
 			UtilAR.setNeutralCamera(libGdxCam);
 			instances = new Array<ModelInstance>();
 			
-			MatOfPoint2f imagePoints = new MatOfPoint2f(results.get(0).toArray());
+			MatOfPoint2f imagePoints = new MatOfPoint2f(sortedMarkerResults[0].toArray());
 			
 			Mat rvec = new Mat();
 			Mat tvec = new Mat();
@@ -292,7 +295,7 @@ public class Handin4 extends ApplicationAdapter {
 			z1 = 0;
 			if(m2Marker) {
 				markers++;
-				imagePoints = new MatOfPoint2f(results.get(1).toArray());
+				imagePoints = new MatOfPoint2f(sortedMarkerResults[1].toArray());
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				a2 = new ModelInstance(xAxisModel);
@@ -305,7 +308,7 @@ public class Handin4 extends ApplicationAdapter {
 			}
 			if(m3Marker) {
 				markers++;
-				imagePoints = new MatOfPoint2f(results.get(2).toArray());
+				imagePoints = new MatOfPoint2f(sortedMarkerResults[2].toArray());
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				a3 = new ModelInstance(xAxisModel);
@@ -318,7 +321,7 @@ public class Handin4 extends ApplicationAdapter {
 			}
 			if(m4Marker) {
 				markers++;
-				imagePoints = new MatOfPoint2f(results.get(3).toArray());
+				imagePoints = new MatOfPoint2f(sortedMarkerResults[3].toArray());
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				a4 = new ModelInstance(xAxisModel);
@@ -362,7 +365,7 @@ public class Handin4 extends ApplicationAdapter {
 				Vector3 fly = new Vector3(x,y,z);			    
 			
 				// Genfind rvec og tvec for m1
-				imagePoints = new MatOfPoint2f(results.get(0).toArray());
+				imagePoints = new MatOfPoint2f(sortedMarkerResults[0].toArray());
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				// Placer flyet.
