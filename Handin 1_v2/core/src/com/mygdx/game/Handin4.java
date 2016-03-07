@@ -296,6 +296,7 @@ public class Handin4 extends ApplicationAdapter {
 			UtilAR.setTransformByRT(rvec, tvec, a1.transform);
 			instances.add(a1);
 			Vector3 v1 = a1.transform.getTranslation(v);
+			System.out.println(v1);
 			x1 = 0;
 			y1 = 0;
 			z1 = 0;
@@ -307,7 +308,9 @@ public class Handin4 extends ApplicationAdapter {
 				a2 = new ModelInstance(xAxisModel);
 				UtilAR.setTransformByRT(rvec, tvec, a2.transform);
 				instances.add(a2);
-				Vector3 v2 = a2.transform.getTranslation(v1);
+				Vector3 v2 = a2.transform.getTranslation(v);
+				System.out.println(v1);
+				System.out.println(v2);
 				x2 = v2.x - v1.x;
 				y2 = v2.y - v1.y;
 				z2 = v2.z - v1.z;
@@ -320,7 +323,7 @@ public class Handin4 extends ApplicationAdapter {
 				a3 = new ModelInstance(xAxisModel);
 				UtilAR.setTransformByRT(rvec, tvec, a3.transform);
 				instances.add(a3);
-				Vector3 v3 = a3.transform.getTranslation(v1);
+				Vector3 v3 = a3.transform.getTranslation(v);
 				x3 = v3.x - v1.x;
 				y3 = v3.y - v1.y;
 				z3 = v3.z - v1.z;
@@ -333,7 +336,7 @@ public class Handin4 extends ApplicationAdapter {
 				a4 = new ModelInstance(xAxisModel);
 				UtilAR.setTransformByRT(rvec, tvec, a4.transform);
 				instances.add(a4);
-				Vector3 v4 = a4.transform.getTranslation(v1);
+				Vector3 v4 = a4.transform.getTranslation(v);
 				x4 = v4.x - v1.x;
 				y4 = v4.y - v1.y;
 				z4 = v4.z - v1.z;
@@ -378,12 +381,12 @@ public class Handin4 extends ApplicationAdapter {
 				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
 				if(flightVector.z != 0) z = z+(speed*(total/flightVector.z));
-				//Vector3 fly = new Vector3(x,y,z);			    
-				Vector3 fly = new Vector3();
+				Vector3 fly = new Vector3(x,y,z);			    
+				/*Vector3 fly = new Vector3();
 				if(flightVector.x != 0)	fly.x = (speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) fly.y = (speed*(total/flightVector.y));
 				if(flightVector.z != 0) fly.z = (speed*(total/flightVector.z));
-				
+				*/
 			
 				// Genfind rvec og tvec for m1
 				imagePoints = new MatOfPoint2f(sortedMarkerResults[0].toArray());
