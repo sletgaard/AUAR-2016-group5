@@ -60,6 +60,7 @@ public class Handin4 extends ApplicationAdapter {
     public ModelBatch modelBatch;
     public ModelInstance boxInstance;
     public Model boxModel;
+    public Model fullMarkerBoxModel;
     public Model xAxisModel;
     public Model yAxisModel;
     public Model zAxisModel;
@@ -108,6 +109,10 @@ public class Handin4 extends ApplicationAdapter {
             new Material(ColorAttribute.createDiffuse(Color.BLACK)),
             Usage.Position | Usage.Normal);
         boxInstance = new ModelInstance(boxModel);
+        
+        fullMarkerBoxModel = modelBuilder.createBox(10f, 10f, 10f, 
+        		new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+        		Usage.Position | Usage.Normal);
         
         xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10), 
 				 new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
