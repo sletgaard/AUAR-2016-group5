@@ -70,7 +70,6 @@ public class Handin4 extends ApplicationAdapter {
     public float x = 0;
     public float y = 0;
     public float z = 0;
-    public float speed = 10;
     public Material material;
     
 	public float x1 = 0;
@@ -85,6 +84,12 @@ public class Handin4 extends ApplicationAdapter {
 	public float z2 = 0;
 	public float z3 = 0;
 	public float z4 = 0;
+	
+	public float basespeed = 1;
+	public float speed = 1;
+	public float sx = 0;
+	public float sy = 0;
+	public float sz = 0;
 	
 	@Override
 	public void create() {
