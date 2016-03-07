@@ -72,6 +72,19 @@ public class Handin4 extends ApplicationAdapter {
     public float z = 0;
     public float speed = 10;
     public Material material;
+    
+	public float x1 = 0;
+	public float x2 = 0;
+	public float x3 = 0;
+	public float x4 = 0;
+	public float y1 = 0;
+	public float y2 = 0;
+	public float y3 = 0;
+	public float y4 = 0;
+	public float z1 = 0;
+	public float z2 = 0;
+	public float z3 = 0;
+	public float z4 = 0;
 	
 	@Override
 	public void create() {
@@ -265,20 +278,6 @@ public class Handin4 extends ApplicationAdapter {
 			Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 					UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);					
 			
-			float x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4; // Kan ikke init med = 0;
-			x1 = 0;
-			x2 = 0;
-			x3 = 0;
-			x4 = 0;
-			y1 = 0;
-			y2 = 0;
-			y3 = 0;
-			y4 = 0;
-			z1 = 0;
-			z2 = 0;
-			z3 = 0;
-			z4 = 0;
-			
 			Vector3 v = new Vector3(0,0,0);
 			Boolean draw = false;
 			int markers = 1;
@@ -304,9 +303,9 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a2.transform);
 				instances.add(a2);
 				Vector3 v2 = a2.transform.getTranslation(v1);
-				x2 = v2.x;
-				y2 = v2.y;
-				z2 = v2.z;
+				x2 = v2.x - v1.x;
+				y2 = v2.y - v1.y;
+				z2 = v2.z - v1.z;
 			}
 			if(m3Marker) {
 				markers++;
@@ -317,9 +316,9 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a3.transform);
 				instances.add(a3);
 				Vector3 v3 = a3.transform.getTranslation(v1);
-				x3 = v3.x;
-				y3 = v3.y;
-				z3 = v3.z;
+				x3 = v3.x - v1.x;
+				y3 = v3.y - v1.y;
+				z3 = v3.z - v1.z;
 			}
 			if(m4Marker) {
 				markers++;
@@ -330,9 +329,9 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a4.transform);
 				instances.add(a4);
 				Vector3 v4 = a4.transform.getTranslation(v1);
-				x4 = v4.x;
-				y4 = v4.y;
-				z4 = v4.z;
+				x4 = v4.x - v1.x;
+				y4 = v4.y - v1.y;
+				z4 = v4.z - v1.z;
 			}
 			if(nextMarker == 0){
 				nextMarker = 1;
@@ -349,7 +348,7 @@ public class Handin4 extends ApplicationAdapter {
 			else {
 				// Flere markers
 				// Er vi nået til destinationen?
-				if(reachedDestination(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4)) {
+				if(reachedDestination()) {
 					// Find ny destination.
 					setNextMarker(m1Marker, m2Marker, m3Marker, m4Marker);
 					draw = true;
@@ -369,7 +368,7 @@ public class Handin4 extends ApplicationAdapter {
 			}
 			if(draw) { // Note at med dette setup er draw altid true
 				// Incrementer flyets position.
-				Vector3 flightVector = getFlightVector(a1,a2,a3,a4);
+				Vector3 flightVector = getFlightVector();
 				float total = flightVector.x + flightVector.y + flightVector.z;
 				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
@@ -468,8 +467,7 @@ public class Handin4 extends ApplicationAdapter {
 		}
 	}
 	
-	public boolean reachedDestination(float x1, float x2, float x3, float x4,
-			float y1, float y2, float y3, float y4, float z1, float z2, float z3, float z4) {
+	public boolean reachedDestination() {
 		
 		float dx, dy, dz = 0;
 		if(nextMarker == 1) {
@@ -497,8 +495,36 @@ public class Handin4 extends ApplicationAdapter {
 		return (distance <= speed);
 	}
 	
-	public Vector3 getFlightVector(ModelInstance a1, ModelInstance a2, ModelInstance a3, ModelInstance a4) {
+	public Vector3 getFlightVector() {
 		
+		Vector3 res;
+		float dx, dy, dz = 0;
+		if(nextMarker == 1) {
+			dx = x1;
+			dy = y1;
+			dz = z1;
+		}
+		else if(nextMarker == 2) {
+			dx = x2;
+			dy = y2;
+			dz = z2;
+		}
+		else if(nextMarker == 3) {
+			dx = x3;
+			dy = y3;
+			dz = z3;
+		}
+		else {
+			dx = x4;
+			dy = y4;
+			dz = z4;
+		}
+		
+		return new Vector3(dx-x,dy-y,dz-z);
+		
+		
+		
+		/*
 		Vector3 res;
 		Vector3 v = new Vector3(x,y,z);
 		if(nextMarker == 1) {
@@ -513,7 +539,7 @@ public class Handin4 extends ApplicationAdapter {
 		else {
 			res = a4.transform.getTranslation(v);
 		}		
-		return res;	
+		return res;	*/
 	}
 	
 	/**
