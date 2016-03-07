@@ -178,7 +178,7 @@ public class Handin4 extends ApplicationAdapter {
 			
 	        Mat rectified = new Mat();
 	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(homoSize,homoSize));
-	        //UtilAR.imShow("key"+i,rectified);
+	        UtilAR.imShow("key"+i,rectified);
 	        
 	        int[] match = bestMarkerMatch(rectified);
 	        
