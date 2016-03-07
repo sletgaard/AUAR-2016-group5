@@ -71,7 +71,7 @@ public class Handin4 extends ApplicationAdapter {
     public float x = 0;
     public float y = 0;
     public float z = 0;
-    public float speed = 10;
+    public float speed = 0.01f;//10;
     public Material material;
     
 	public float x1 = 0;
@@ -297,6 +297,9 @@ public class Handin4 extends ApplicationAdapter {
 			instances.add(a1);
 			Vector3 v1 = a1.transform.getTranslation(v);
 			System.out.println(v1);
+			float xx = v1.x;
+			float xy = v1.y;
+			float xz = v1.z;
 			x1 = 0;
 			y1 = 0;
 			z1 = 0;
@@ -311,9 +314,9 @@ public class Handin4 extends ApplicationAdapter {
 				Vector3 v2 = a2.transform.getTranslation(v);
 				System.out.println(v1);
 				System.out.println(v2);
-				x2 = v2.x - v1.x;
-				y2 = v2.y - v1.y;
-				z2 = v2.z - v1.z;
+				x2 = v2.x - xx;
+				y2 = v2.y - xy;
+				z2 = v2.z - xz;
 			}
 			if(m3Marker) {
 				markers++;
@@ -324,9 +327,9 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a3.transform);
 				instances.add(a3);
 				Vector3 v3 = a3.transform.getTranslation(v);
-				x3 = v3.x - v1.x;
-				y3 = v3.y - v1.y;
-				z3 = v3.z - v1.z;
+				x3 = v3.x - xx;
+				y3 = v3.y - xy;
+				z3 = v3.z - xz;
 			}
 			if(m4Marker) {
 				markers++;
@@ -337,9 +340,9 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a4.transform);
 				instances.add(a4);
 				Vector3 v4 = a4.transform.getTranslation(v);
-				x4 = v4.x - v1.x;
-				y4 = v4.y - v1.y;
-				z4 = v4.z - v1.z;
+				x4 = v4.x - xx;
+				y4 = v4.y - xy;
+				z4 = v4.z - xz;
 			}
 			if(nextMarker == 0){
 				nextMarker = 1;
