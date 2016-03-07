@@ -71,7 +71,7 @@ public class Handin4 extends ApplicationAdapter {
     public float x = 0;
     public float y = 0;
     public float z = 0;
-    public float speed = 0.01f;//10;
+    public float speed = 1f; //10;
     public Material material;
     
 	public float x1 = 0;
@@ -377,28 +377,43 @@ public class Handin4 extends ApplicationAdapter {
 				Vector3 test2 = a2.transform.getTranslation(new Vector3());
 				System.out.println("t2: " + test2.x + ", " + test2.y + ", " + test2.z);
 			}
+			System.out.println("next: " + nextMarker + ", prev: " + prevMarker);
 			if(draw) { // Note at med dette setup er draw altid true
 				// Incrementer flyets position.
 				Vector3 flightVector = getFlightVector();
-				float total = flightVector.x + flightVector.y + flightVector.z;
-				if(flightVector.x != 0)	x = x+(speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
-				if(flightVector.y != 0) y = y+(speed*(total/flightVector.y));
-				if(flightVector.z != 0) z = z+(speed*(total/flightVector.z));
-				Vector3 fly = new Vector3(x,y,z);			    
-				/*Vector3 fly = new Vector3();
-				if(flightVector.x != 0)	fly.x = (speed*(total/flightVector.x)); // Nuværende position + proportionelt i retning
-				if(flightVector.y != 0) fly.y = (speed*(total/flightVector.y));
-				if(flightVector.z != 0) fly.z = (speed*(total/flightVector.z));
-				*/
+				System.out.println("plane: " + x + ", " + y + ", " + z);
+				System.out.println("FlightVector: " + flightVector);
+				float total = Math.abs(flightVector.x) + Math.abs(flightVector.y) + Math.abs(flightVector.z);
+				if(flightVector.x != 0)	x = x+(speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) y = y+(speed*(flightVector.y/total));
+				if(flightVector.z != 0) z = z+(speed*(flightVector.z/total));
+				System.out.println("plane2: " + x + ", " + y + ", " + z);
+				Vector3 fly = new Vector3(x,y,z);
+				Vector3 fly2 = new Vector3();
+				if(flightVector.x != 0)	fly2.x = (speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
+				if(flightVector.y != 0) fly2.y = (speed*(flightVector.y/total));
+				if(flightVector.z != 0) fly2.z = (speed*(flightVector.z/total));
+				System.out.println("fly2: " + fly2);
+				
 			
 				// Genfind rvec og tvec for m1
 				imagePoints = new MatOfPoint2f(sortedMarkerResults[0].toArray());
 				Calib3d.solvePnP(objectPoints, imagePoints, cameraMatrix,
 						UtilAR.getDefaultDistortionCoefficients(), rvec, tvec);	
 				// Placer flyet.
+				Vector3 planePos = boxInstance.transform.getTranslation(new Vector3());
+				boxInstance.transform.translate(-planePos.x, -planePos.y, -planePos.z);
+				Vector3 newPlanePos = new Vector3(fly.x + xx, fly.y + xy, fly.z + xz);
+				boxInstance.transform.translate(newPlanePos);
+				/*
+				System.out.println("box1 " + boxInstance.transform.getTranslation(new Vector3()));
 				UtilAR.setTransformByRT(rvec, tvec, boxInstance.transform);
+				System.out.println("box2 " + boxInstance.transform.getTranslation(new Vector3()));
 				//System.out.println(fly.x + ", " + fly.y + ", " + fly.z);
+				System.out.println("fly: " + fly);
 				boxInstance.transform.translate(fly);
+				System.out.println("box3 " + boxInstance.transform.getTranslation(new Vector3()));
+				*/
 				instances.add(boxInstance);
 			}
 		
