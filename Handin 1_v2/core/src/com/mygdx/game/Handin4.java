@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -166,7 +167,13 @@ public class Handin4 extends ApplicationAdapter {
 			objPoints[3] = new Point(0,homoSize);
 			homoPoints = new MatOfPoint2f(objPoints);
 			
-	        Mat homography = Calib3d.findHomography(imagePoints, homoPoints);
+	        //Mat homography = Calib3d.findHomography(imagePoints, homoPoints);
+			Mat homography = ourFindHomography(results.get(i).toArray(), objPoints);
+			
+			
+			
+			
+			
 	        Mat rectified = new Mat();
 	        Imgproc.warpPerspective(cameraImage, rectified, homography, new Size(homoSize,homoSize));
 	        //UtilAR.imShow("key"+i,rectified);
@@ -552,5 +559,112 @@ public class Handin4 extends ApplicationAdapter {
 		}
 		
 		return grid20;
+	}
+	
+	public Mat ourFindHomography(Point[] imagePoints, Point[] objPoints) {
+		
+		Mat h = new Mat(8,1,CvType.CV_64F);
+		Mat p = new Mat(8,8,CvType.CV_64F);
+		Mat res = new Mat(8,1,CvType.CV_64F);
+		
+		// Første point = (0,0)
+		p.put(0, 0, -objPoints[0].x); // -x1 -y1 -1 0 0 0 x1x1' y1x1'
+		p.put(0, 1, -objPoints[0].y); // 
+		p.put(0, 2, -1);
+		p.put(0, 3, 0);
+		p.put(0, 4, 0);
+		p.put(0, 5, 0);
+		p.put(0, 6, objPoints[0].x*imagePoints[0].x);
+		p.put(0, 7, objPoints[0].y*imagePoints[0].x);
+		res.put(0, 0, -imagePoints[0].x); // x1'
+		
+		p.put(1, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1'
+		p.put(1, 1, 0); // 
+		p.put(1, 2, 0);
+		p.put(1, 3, -objPoints[0].x);
+		p.put(1, 4, -objPoints[0].y);
+		p.put(1, 5, -1);
+		p.put(1, 6, objPoints[0].x*imagePoints[0].y);
+		p.put(1, 7, objPoints[0].y*imagePoints[0].y);
+		res.put(1, 0, -imagePoints[0].y); // y1'
+		
+		// Andet point = (500,0)
+		p.put(2, 0, -objPoints[1].x); // -x1 -y1 -1 0 0 0 x1x1' y1x1'
+		p.put(2, 1, -objPoints[1].y); // 
+		p.put(2, 2, -1);
+		p.put(2, 3, 0);
+		p.put(2, 4, 0);
+		p.put(2, 5, 0);
+		p.put(2, 6, objPoints[1].x*imagePoints[1].x);
+		p.put(2, 7, objPoints[1].y*imagePoints[1].x);
+		res.put(2, 0, -imagePoints[1].x); // x1'
+		
+		p.put(3, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1'
+		p.put(3, 1, 0); // 
+		p.put(3, 2, 0);
+		p.put(3, 3, -objPoints[1].x);
+		p.put(3, 4, -objPoints[1].y);
+		p.put(3, 5, -1);
+		p.put(3, 6, objPoints[1].x*imagePoints[1].y);
+		p.put(3, 7, objPoints[1].y*imagePoints[1].y);
+		res.put(3, 0, -imagePoints[1].y); // y1'
+		
+		// Tredje point = (500,500)
+		p.put(4, 0, -objPoints[2].x); // -x1 -y1 -1 0 0 0 x1x1' y1x1'
+		p.put(4, 1, -objPoints[2].y); // 
+		p.put(4, 2, -1);
+		p.put(4, 3, 0);
+		p.put(4, 4, 0);
+		p.put(4, 5, 0);
+		p.put(4, 6, objPoints[2].x*imagePoints[2].x);
+		p.put(4, 7, objPoints[2].y*imagePoints[2].x);
+		res.put(4, 0, -imagePoints[2].x); // x1'
+		
+		p.put(5, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1'
+		p.put(5, 1, 0); // 
+		p.put(5, 2, 0);
+		p.put(5, 3, -objPoints[2].x);
+		p.put(5, 4, -objPoints[2].y);
+		p.put(5, 5, -1);
+		p.put(5, 6, objPoints[2].x*imagePoints[2].y);
+		p.put(5, 7, objPoints[2].y*imagePoints[2].y);
+		res.put(5, 0, -imagePoints[2].y); // y1'
+		
+		// Fjerde point = (0,500)
+		p.put(6, 0, -objPoints[3].x); // -x1 -y1 -1 0 0 0 x1x1' y1x1'
+		p.put(6, 1, -objPoints[3].y); // 
+		p.put(6, 2, -1);
+		p.put(6, 3, 0);
+		p.put(6, 4, 0);
+		p.put(6, 5, 0);
+		p.put(6, 6, objPoints[3].x*imagePoints[3].x);
+		p.put(6, 7, objPoints[3].y*imagePoints[3].x);
+		res.put(6, 0, -imagePoints[3].x); // x1'
+		
+		p.put(7, 0, 0); // 0 0 0 -x1 -y1 -1 x1y1' y1y1'
+		p.put(7, 1, 0); // 
+		p.put(7, 2, 0);
+		p.put(7, 3, -objPoints[3].x);
+		p.put(7, 4, -objPoints[3].y);
+		p.put(7, 5, -1);
+		p.put(7, 6, objPoints[3].x*imagePoints[3].y);
+		p.put(7, 7, objPoints[3].y*imagePoints[3].y);
+		res.put(7, 0, -imagePoints[3].y); // y1'
+		
+		Core.solve(p, res, h, Core.DECOMP_SVD);
+		// h er nu 8x1, skal laves om til 3x3
+		
+		Mat homography = new Mat(3,3,CvType.CV_64F);
+		homography.put(0, 0, h.get(0,0));
+		homography.put(0, 1, h.get(1,0));
+		homography.put(0, 2, h.get(2,0));
+		homography.put(1, 0, h.get(3,0));
+		homography.put(1, 1, h.get(4,0));
+		homography.put(1, 2, h.get(5,0));
+		homography.put(2, 0, h.get(6,0));
+		homography.put(2, 1, h.get(7,0));
+		homography.put(2, 2, 1);
+		
+		return homography;
 	}
 }
