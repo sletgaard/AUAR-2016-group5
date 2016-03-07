@@ -176,9 +176,11 @@ public class Handin4 extends ApplicationAdapter {
 	        int[] match = bestMarkerMatch(rectified);
 	        
 	        // Cutoff threshold
-	        if (match[1] < 20) {
-	        	//continue;
+	        if (match[1] < 80) {
+	        	continue;
 	        }
+	        System.out.println("Marker " + match[0] + ": " + match[1]);
+	        Imgproc.drawContours(cameraImage, results, i, new Scalar(0,0,255));
 	        
 	        sortedMarkerResults[match[0]] = imagePoints;
 	        switch (match[0]) {
