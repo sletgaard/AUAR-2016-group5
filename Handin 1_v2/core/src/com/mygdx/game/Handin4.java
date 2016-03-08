@@ -47,7 +47,7 @@ public class Handin4 extends ApplicationAdapter {
 	private static final int ID_MARKER_SPEED = 7;
 	
 	private int[][][] averagedMarkers = new int[NUMBER_OF_MARKERS][GRID_SIZE][GRID_SIZE];
-	private static final int homoSize = 500;
+	private static final int homoSize = 200;
 	MatOfPoint2f homoPoints;
 	
 	public PerspectiveOffCenterCamera libGdxCam;
@@ -95,7 +95,7 @@ public class Handin4 extends ApplicationAdapter {
 	@Override
 	public void create() {
 		String dir = "../core/assets/";
-		String[] files = {"base.png", "point1.png", "point2.png", "point3.png",
+		String[] files = {"point4.png", "point1.png", "point2.png", "point3.png",
 				"red.png", "green.png", "blue.png", "speed.png"};
 		for (int i=0; i<files.length; i++) {
 			String file = dir + files[i];
@@ -110,6 +110,7 @@ public class Handin4 extends ApplicationAdapter {
 		libGdxCam = new PerspectiveOffCenterCamera();
 		cameraMatrix = UtilAR.getDefaultIntrinsics(640f, 480f);
 		libGdxCam.setByIntrinsics(cameraMatrix, 640f, 480f);
+		libGdxCam.far = 1000;
 		libGdxCam.position.set(5f, 5f, 5f);
 		libGdxCam.lookAt(0,0,0);
 		libGdxCam.update();
@@ -207,7 +208,7 @@ public class Handin4 extends ApplicationAdapter {
 	        
 	        // Cutoff threshold
 	        if (match[1] < 80) {
-	        	continue;
+	        	//continue;
 	        }
 	        //System.out.println("Marker " + match[0] + ": " + match[1]);
 	        Imgproc.drawContours(cameraImage, results, i, new Scalar(0,0,255));
@@ -263,6 +264,10 @@ public class Handin4 extends ApplicationAdapter {
 		if(redMarker == true && blueMarker == true && greenMarker == true) {
 			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.WHITE)));
 		}
+		if(redMarker == false && blueMarker == false && greenMarker == false) {
+			boxInstance.materials.first().set(new Material(ColorAttribute.createDiffuse(Color.BLACK)));
+		}
+		
 		
 		//Imgproc.drawContours(cameraImage, ap, 0, new Scalar(0,0,255));
 		
@@ -299,7 +304,7 @@ public class Handin4 extends ApplicationAdapter {
 			UtilAR.setTransformByRT(rvec, tvec, a1.transform);
 			instances.add(a1);
 			Vector3 v1 = a1.transform.getTranslation(v);
-			System.out.println(v1);
+			//System.out.println(v1);
 			float xx = v1.x;
 			float xy = v1.y;
 			float xz = v1.z;
@@ -315,8 +320,8 @@ public class Handin4 extends ApplicationAdapter {
 				UtilAR.setTransformByRT(rvec, tvec, a2.transform);
 				instances.add(a2);
 				Vector3 v2 = a2.transform.getTranslation(v);
-				System.out.println(v1);
-				System.out.println(v2);
+				//System.out.println(v1);
+				//System.out.println(v2);
 				x2 = v2.x - xx;
 				y2 = v2.y - xy;
 				z2 = v2.z - xz;
@@ -397,31 +402,31 @@ public class Handin4 extends ApplicationAdapter {
 			
 			
 			
-			System.out.println("1: " + x1 + ", " + y1 + ", " + z1);
+			//System.out.println("1: " + x1 + ", " + y1 + ", " + z1);
 			Vector3 test1 = a1.transform.getTranslation(new Vector3());
-			System.out.println("t1: " + test1.x + ", " + test1.y + ", " + test1.z);
-			System.out.println("2: " + x2 + ", " + y2 + ", " + z2);
+			//System.out.println("t1: " + test1.x + ", " + test1.y + ", " + test1.z);
+			//System.out.println("2: " + x2 + ", " + y2 + ", " + z2);
 			if (m2Marker) {
 				Vector3 test2 = a2.transform.getTranslation(new Vector3());
-				System.out.println("t2: " + test2.x + ", " + test2.y + ", " + test2.z);
+				//System.out.println("t2: " + test2.x + ", " + test2.y + ", " + test2.z);
 			}
-			System.out.println("next: " + nextMarker + ", prev: " + prevMarker);
+			//System.out.println("next: " + nextMarker + ", prev: " + prevMarker);
 			if(draw) { // Note at med dette setup er draw altid true
 				// Incrementer flyets position.
 				Vector3 flightVector = getFlightVector();
-				System.out.println("plane: " + x + ", " + y + ", " + z);
-				System.out.println("FlightVector: " + flightVector);
+				//System.out.println("plane: " + x + ", " + y + ", " + z);
+				//System.out.println("FlightVector: " + flightVector);
 				float total = Math.abs(flightVector.x) + Math.abs(flightVector.y) + Math.abs(flightVector.z);
 				if(flightVector.x != 0)	x = x+(speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) y = y+(speed*(flightVector.y/total));
 				if(flightVector.z != 0) z = z+(speed*(flightVector.z/total));
-				System.out.println("plane2: " + x + ", " + y + ", " + z);
+				//System.out.println("plane2: " + x + ", " + y + ", " + z);
 				Vector3 fly = new Vector3(x,y,z);
 				Vector3 fly2 = new Vector3();
 				if(flightVector.x != 0)	fly2.x = (speed*(flightVector.x/total)); // Nuværende position + proportionelt i retning
 				if(flightVector.y != 0) fly2.y = (speed*(flightVector.y/total));
 				if(flightVector.z != 0) fly2.z = (speed*(flightVector.z/total));
-				System.out.println("fly2: " + fly2);
+				//System.out.println("fly2: " + fly2);
 				
 			
 				// Genfind rvec og tvec for m1
