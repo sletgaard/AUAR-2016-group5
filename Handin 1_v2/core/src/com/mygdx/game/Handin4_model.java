@@ -24,6 +24,7 @@ import org.opencv.videoio.VideoCapture;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -130,29 +131,29 @@ public class Handin4_model extends ApplicationAdapter {
         ModelBuilder modelBuilder = new ModelBuilder();
         //Ship
         UBJsonReader jsonReader = new UBJsonReader();
-
         G3dModelLoader modelLoader = new G3dModelLoader(jsonReader);
-
-        boxModel = modelLoader.loadModel(Gdx.files.getFileHandle("core/assets/plane.g3db", Files.FileType.Internal));
-
-
+        
+        boxModel = modelLoader.loadModel(Gdx.files.getFileHandle("../core/assets/plane.g3db", Files.FileType.Internal));
         boxInstance = new ModelInstance(boxModel);
-
-
 
         fullMarkerBoxModel = modelBuilder.createBox(10f, 10f, 10f,
                 new Material(ColorAttribute.createDiffuse(Color.WHITE)),
                 Usage.Position | Usage.Normal);
 
-        xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10),
+        /*xAxisModel = modelBuilder.createArrow(new Vector3(0,0,0), new Vector3(0,0,-10),
                 new Material(ColorAttribute.createDiffuse(Color.BLUE)),
                 Usage.Position | Usage.Normal);
-
+        */
+        /*xAxisModel = modelBuilder.createCylinder(2F, 5F, 2F, 10,
+        		new Material(ColorAttribute.createDiffuse(Color.GRAY)), Usage.Position | Usage.Normal);
+		*/
+        xAxisModel = modelBuilder.createArrow(0F, 0F, 0F, 0F, 0F, -5F,
+        		0.02F, 10F, 10, GL20.GL_TRIANGLES,
+        		new Material(ColorAttribute.createDiffuse(Color.BLUE)), Usage.Position | Usage.Normal);
     }
 
     @Override
     public void render() {
-
         // Image
         Mat cameraImage = new Mat();
         camera.read(cameraImage);
@@ -449,6 +450,18 @@ public class Handin4_model extends ApplicationAdapter {
                 boxInstance.transform.translate(-planePos.x, -planePos.y, -planePos.z);
                 Vector3 newPlanePos = new Vector3(fly.x + xx, fly.y + xy, fly.z + xz);
                 boxInstance.transform.translate(newPlanePos);
+                /*Vector3 direction;
+                if (nextMarker == 1) {
+                	direction = a1.transform.getTranslation(new Vector3());
+                } else if (nextMarker == 2) {
+                	direction = a2.transform.getTranslation(new Vector3());
+                } else if (nextMarker == 3) {
+                	direction = a3.transform.getTranslation(new Vector3());
+                } else {
+                	direction = a4.transform.getTranslation(new Vector3());                	
+                }*/
+                //boxInstance.transform.setToLookAt(newPlanePos, direction, new Vector3(0,0,-1));
+                //boxInstance.transform.rotate(new Vector3(0, 0, 1), 1);
 				/*
 				System.out.println("box1 " + boxInstance.transform.getTranslation(new Vector3()));
 				UtilAR.setTransformByRT(rvec, tvec, boxInstance.transform);
